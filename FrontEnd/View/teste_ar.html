@@ -24,14 +24,16 @@
             if (nomeArquivoModelo) {
                 const modelo = document.querySelector('#modelo-ativo');
 
-                // O caminho absoluto para a pasta
-                const urlModelo = `/Uploads/${nomeArquivoModelo}`;
+                // --- AQUI ESTÁ A CORREÇÃO ---
+                // O caminho agora é relativo. A partir de /FrontEnd/View/,
+                // o '../../' sobe duas pastas (para a raiz do projeto)
+                // e depois desce para a pasta /Uploads/.
+                const urlModelo = `../../Uploads/${nomeArquivoModelo}`;
 
-                // AQUI ESTÁ A CORREÇÃO! Removemos o "url()"
                 modelo.setAttribute('gltf-model', urlModelo);
 
             } else {
-                console.error("Nenhum modelo especificado na URL. Use ?modelo=seu_arquivo.glb");
+                console.error("Nenhum modelo especificado no URL. Use ?modelo=seu_arquivo.glb");
             }
         };
     </script>
