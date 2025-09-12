@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login da Cypher</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+  <!-- Container de fundo -->
+  <div class="background_container">
+    <main class="content">
+      <img src="../View/img/Fundo.png" alt="Logo Cypher" class="imagem-fundo">
+    </main>
+  </div>
+
+  <!-- Container principal -->
+  <div id="container_principal" class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div id="formulario" class="card shadow-lg p-4 rounded">
+      <div class="text-center mb-4">
+        <img src="../View/img/Logo_text.svg" alt="Logo Cypher" class="imagem-logo" width="150">
+      </div>
+
+      <!-- A ligação com o JavaScript será feita no próprio arquivo .js, o que é uma prática mais moderna. -->
+      <form id="formCadastro">
+        <div class="mb-3">
+          <label for="email" class="form-label">E-mail</label>
+          <input type="email" class="form-control" id="email" placeholder="Digite seu e-mail" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Senha</label>
+          <input type="password" class="form-control" id="password" placeholder="Digite sua senha" required>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="exampleCheckbox">
+            <label id="caixa" class="form-check-label" for="exampleCheckbox">Lembre de mim</label>
+          </div>
+          <a id="esqueci" href="#" class="text-white">Esqueci minha senha</a>
+        </div>
+
+        <!--  Um 'div' vazio foi adicionado para exibir as mensagens de erro.
+             As classes do Bootstrap 'text-danger' (vermelho) e 'text-center' já o estilizam. -->
+        <div id="mensagem-erro" class="text-danger text-center mt-3"></div>
+
+        <button id="botao" type="submit" class="btn btn-cypher w-100 mt-3">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!--  carrega o arquivo de configuração -->
+  <script src="../JS/config.js"></script>
+
+
+  <script src="../JS/login.js"></script>
+</body>
+
+</html>

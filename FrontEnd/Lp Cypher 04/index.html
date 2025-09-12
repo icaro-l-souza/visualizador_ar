@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    <title>Cypher</title>
+</head>
+
+<body>
+
+
+    <!--Header-->
+    <div class="home">
+        <header id="header">
+            <!--NAV-->
+            <nav class=" navegacao container">
+
+                <!--Logo cypher central-->
+                <div class="header-logo">
+                    <img src="assets/logo.svg" alt="logo chypher" class="mini_logo">
+                </div>
+
+                <div class="list">
+                    <ul>
+                        <li><a href="#header">Home</a></li>
+                        <li><a href="#about">Sobre</a></li>
+                        <li><a href="#video">Empresa</a></li>
+                        <li><a href="#services">Serviços</a></li>
+                        <li><a href="#footer">Contato</a></li>
+                    </ul>
+                </div>
+
+
+            </nav>
+            <!--Main-->
+            <main class="hero container">
+                <h1>Gestão Inteligente, Indústria Eficiente</h1>
+                <p>O sistema que transforma manutenção em estratégia e potencializa resultados.</p>
+
+                
+                <div id="buttonsDiv" >
+                    <a href="#" class="button-contact" onclick="openCustomModal(event)">Adquira sua Gestão</a>
+                    <a href="../Tela_login/index.html" class="button-contact">Entrar</a>
+                </div>
+
+
+                <div class="custom-modal" id="customModal">
+                    <div class="custom-modal-content">
+                        <span class="custom-close" onclick="closeCustomModal()">&times;</span>
+                        <h2 id="titulocadas">Preencha suas informações</h2>
+                        <form id="formCadastro" onsubmit="enviarFormulario(event)">
+                            <div class="divisao">
+                                <div id="number1">
+                                    <div class="custom-form-group">
+                                        <label>Nome Completo:</label>
+                                        <input type="text" required>
+                                    </div>
+                                    <div class="custom-form-group">
+                                        <label>CPF:</label>
+                                        <input type="text" required>
+                                    </div>
+                                    <div class="custom-form-group">
+                                        <label>Data de Nascimento:</label>
+                                        <input type="date" required>
+                                    </div>
+                                    <div class="custom-form-group">
+                                        <label>Profissão:</label>
+                                        <input type="text">
+                                    </div>
+                                    <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                                        <label for="inputEmail" class="form-label" id="email_cadastro">E-mail</label>
+                                        <input type="email" class="form-control" id="inputEmail"
+                                            placeholder="Digite o seu e-mail">
+                                    </div>
+                                </div>
+
+                                <div id="number2">
+                                    <div class="custom-form-group">
+                                        <label>CEP:</label>
+                                        <div class="cep-container">
+                                            <input type="text" id="cep" maxlength="9" placeholder="Digite seu CEP">
+                                            <button type="button" onclick="buscarCEP()">Buscar</button>
+                                        </div>
+                                        <div class="custom-form-group">
+                                            <input type="text" id="bairro" placeholder="Bairro">
+                                        </div>
+
+                                        <div class="custom-form-group">
+                                            <input type="text" id="rua" placeholder="Rua">
+                                        </div>
+
+                                        <div class="custom-form-group">
+                                            <input type="text" id="numero" placeholder="Número">
+                                        </div>
+
+                                        <div class="custom-form-group">
+                                            <input type="text" id="complemento" placeholder="Complemento">
+                                        </div>
+                                    </div>
+
+                                    <div class="custom-form-group">
+                                        <label>Celular:</label>
+                                        <input type="text" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit">Enviar</button>
+
+                        </form>
+                    </div>
+                </div>
+            </main>
+
+            <script src="../Lp Cypher 04/script.js"></script>
+
+        </header>
+    </div>
+
+
+
+
+    <!--_________________________________________________1 seção_____________________________________________________-->
+
+    <section class="about" id="about">
+        <!--<div class="content-whatsapp">
+            <img src="assets/whatssapp.svg" alt="whatssapp" id="figure">
+        </div>-->
+        <div class="container about-content">
+            <div>
+                <img src="assets/images.png" alt="Imagem cypher" />
+            </div>
+            <div class="about-description">
+                <h2>Por Que Fazemos a Diferença?</h2>
+                <p class="texto">
+                    Desde nossa fundação em 2024, na Cypher, nos dedicamos a transformar o ambiente de trabalho com
+                    soluções inovadoras e impactantes. Nossa missão é clara: maximizar a produtividade, automatizar
+                    processos e proporcionar um gerenciamento eficiente para empresas que buscam excelência operacional.
+                    <br>
+                    <br>
+                    Com a Cypher, sua empresa terá em mãos uma solução robusta e inteligente, projetada para simplificar
+                    e automatizar a gestão de manutenção industrial. Nossa plataforma integra ferramentas avançadas para
+                    monitorar ativos em tempo real, programar intervenções preventivas, organizar ordens de serviço e
+                    gerar relatórios detalhados, tudo de maneira intuitiva e acessível.
+                    <br>
+               <!--_________________________________________________2 seção_____________________________________________________-->
+         <br>
+                    Estamos comprometidos em transformar a maneira como sua empresa gerencia seus recursos,
+                    potencializando resultados e garantindo operações contínuas e eficientes. Na Cypher, acreditamos que
+                    tecnologia de ponta é a chave para o sucesso no mercado competitivo atual.
+                </p>
+
+                <p class="frase">Simplificando a manutenção, potencializando resultados.</p>
+            </div>
+        </div>
+    </section>
+
+    <!--_________________________________________________2 seção_____________________________________________________-->
+
+    <section class="Frame-section">
+        <h2 class="Frame-image">Melhore sua Gestão de Manutenção Industrial:</h2>
+        <div class="Frame-container">
+            <div class="Frame-box">
+                <h3>Soluções Avançadas</h3>
+                <p>Soluções inteligentes para otimizar processos.</p>
+                <img src="https://img.icons8.com/ios-filled/50/758e9f/engineering.png" alt="Soluções Avançadas">
+            </div>
+            <div class="Frame-box">
+                <h3>Sensores Modernos</h3>
+                <p>Sensores modernos para maior eficiência.</p>
+                <img src="https://img.icons8.com/ios/50/758e9f/sensor.png" alt="Sensores Modernos">
+            </div>
+            <div class="Frame-box">
+                <h3>Monitoramento em Tempo Real</h3>
+                <p>Monitoramento preciso de ativos em tempo real.</p>
+                <img src="https://img.icons8.com/ios-filled/50/758e9f/bar-chart.png" alt="Monitoramento em Tempo Real">
+            </div>
+            <div class="Frame-box">
+                <h3>Gestão de Ordens</h3>
+                <p>Gestão de ordens e relatórios eficiente.</p>
+                <img src="https://img.icons8.com/ios-filled/50/758e9f/task.png" alt="Gestão de Ordens">
+            </div>
+            <div class="Frame-box">
+                <h3>Maximize Resultados</h3>
+                <p>Reduza custos e maximize resultados.</p>
+                <img src="https://img.icons8.com/ios-filled/50/758e9f/money-bag.png" alt="Maximize Resultados">
+            </div>
+        </div>
+    </section>
+
+
+
+    <!--_________________________________________________3 seção_____________________________________________________-->
+
+    <section class="video" id="video">
+
+        <div class="video2">
+            <div class="video" style="display: flex; justify-content: center;">
+                <iframe src="https://www.youtube.com/embed/dYTd-r2M448?si=rKDtZJM2qgj3i7qf" title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <p class="pare">Descubra como nossa empresa transforma a gestão de manutenção industrial <br>com
+                soluções inovadoras, focadas em eficiência, redução de custos e resultados otimizados.</p>
+        </div>
+
+    </section>
+
+
+    <!--_________________________________________________4 seção_____________________________________________________-->
+
+    <section class="services" id="services">
+        <div class="services-content container">
+            <h2>Está Pronto para Transformar a Manutenção da Sua Indústria?</h2>
+            <p>Oferecemos serviços especializados e soluções inteligentes para otimizar sua manutenção.</p>
+        </div>
+        <section class="images-section">
+            <div class="line">
+                <div class="image">
+                    <img src="assets/1.png" alt="primary" />
+                    <div class="image-text">
+                        <strong>Integração de Sistemas</strong>
+                    </div>
+                    <div class="image-content">
+                        <h3>Automação e Conectividade em Todos os Níveis</h3>
+                        <p>Reduza falhas e otimize processos com sistemas que se comunicam de forma inteligente.</p>
+                    </div>
+                </div>
+                <div class="image">
+                    <img src="assets/2.png" alt="secondary" />
+                    <div class="image-text">
+                        <strong>Gestão Operacional</strong>
+                    </div>
+                    <div class="image-content">
+                        <h3>Controle Total para Decisões Estratégicas</h3>
+                        <p>Aumente a produtividade e maximize recursos com soluções adaptadas à sua operação.</p>
+                    </div>
+                </div>
+                <div class="image">
+                    <img src="assets/3.png" alt="third" />
+                    <div class="image-text">
+                        <strong>Suporte e Manutenção Remota</strong>
+                    </div>
+                    <div class="image-content">
+                        <h3>Assistência Rápida e Econômica, Onde Você Estiver</h3>
+                        <p>Minimize custos e evite paradas com suporte 24/7 e intervenções rápidas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+
+
+    <!--_________________________________________________5 seção_____________________________________________________-->
+
+    <section class="carrossel">
+        <div class="divM">
+            <div class="divm">
+                <div class=" item" style="--delay:0s"><img src="assets/Carrossel/1.png" alt=""></div>
+                <div class=" item" style="--delay:4s"><img src="assets/Carrossel/2.png" alt=""></div>
+                <div class=" item" style="--delay:8s"><img src="assets/Carrossel/3.png" alt=""></div>
+                <div class=" item" style="--delay:12s"><img src="assets/Carrossel/4.png" alt=""></div>
+                <div class=" item" style="--delay:16s"><img src="assets/Carrossel/5.png" alt=""></div>
+            </div>
+        </div>
+
+
+    </section>
+
+    <!--_________________________________________________Footer_____________________________________________________-->
+
+    <footer id="footer">
+        <div class="complet">
+            <div class="image-footer">
+                <img src="assets/logo.svg" alt="logo footer">
+            </div>
+            <div class="footer-section">
+                <h4>Empresa</h4>
+                <ul>
+                    <li><a href="#">Sobre Nós</a></li>
+                    <li><a href="#">Nossa História</a></li>
+                    <li><a href="#">Missão, Visão e Valores</a></li>
+                    <li><a href="#">Equipe</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Recursos</h4>
+                <ul>
+                    <li><a href="#">Gallery</a></li>
+                    <li><a href="#">Casos de Sucesso</a></li>
+                    <li><a href="#">Blogs</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Localização</h4>
+                <ul>
+                    <li><a href="#">Escritórios</a></li>
+                    <li><a href="#">Endereço</a></li>
+                    <li><a href="#">Telefones</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Central de Ajuda</a></li>
+                    <li><a href="#">Contato</a></li>
+                    <li><a href="#">Perguntas Frequentes</a></li>
+                    <li><a href="#">Política de Privacidade</a></li>
+                    <li><a href="#">Redes Sociais</a></li>
+                    <li><a href="#">Feedback</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section newsletter">
+                <h4>Receba Nossas Atualizações</h4>
+                <input type="email" placeholder="Email Address">
+                <button>Inscreva-se para Novidades</button>
+                <!--Ìcones-->
+                <div class="header-icons2">
+
+                    <a href="#">
+                        <i class="fa-brands fa-instagram fa-2x"></i>
+                    </a>
+                    <a href="#">
+                        <i class="fa-brands fa-linkedin fa-2x"></i>
+                    </a>
+                    <a href="#">
+                        <i class="fa-brands fa-youtube fa-2x"></i>
+                    </a>
+                    <a href="#">
+                        <i class="fa-brands fa-whatsapp fa-2x"></i>
+                    </a>
+                    <a href="#">
+                        <i class="fa-brands fa-github fa-2x"></i>
+                    </a>
+                    <a href="#">
+                        <i class="fa-brands fa-telegram fa-2x"></i>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="copyright">
+        &copy; 2025 TCC CYPHER LTD
+    </div>
+
+</body>
+
+</html>

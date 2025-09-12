@@ -1,0 +1,92 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    margin: 0;
+    position: relative;
+    color: white;
+}
+
+/* Estilizando as labels */
+label {
+    color: white;
+}
+
+/* Formulário */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.background_container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to bottom, rgba(6, 18, 30, 0.1), #06121e), url("../View/img/Fundo.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    z-index: -1;
+}
+
+.imagem-fundo {
+    width: 100%;
+    margin: 0;
+    height: 100vh;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+}
+
+.imagem-logo {
+    width: 230px;
+    margin: 0;
+}
+
+/* Botão */
+#botao {
+    background-color: #284058;
+    border-color: #284058;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+/* Aplicando hover no Botão */
+#botao:hover {
+    background-color: #28405898;
+    border-color: #28405898;
+}
+
+/* Centralizando o conteúdo e limitando a largura */
+#container_principal {
+    max-width: 600px;
+}
+
+/* Ajustando o formulário */
+#formulario {
+    max-width: 400px;
+    width: 100%;
+    border-radius: 15px;
+    background-color: #0D1C2B;
+    border: 1px solid rgb(189, 189, 189);
+}
+
+/* Ajustando o checkbox */
+#caixa {
+    font-size: 16px;
+    margin-left: 0px;
+}
