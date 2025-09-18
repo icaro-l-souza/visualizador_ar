@@ -141,12 +141,32 @@ export function loadMenu() {
                         </li>
 
                         ${isAdmin ? `
-                        <li class="nav-item">
-                            <a class="nav-link item-navegacao" href="../View/Historico.html">Histórico</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Histórico</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="../View/Historico.html">
+                                        Histórico de Ordens
+                                    </a>
+                                </li>
+                                                                <li>
+                                    <a class="dropdown-item" href="../View/HistoricoAtivo.html">
+                                        Histórico de Ativos
+                                    </a>
+                                </li>
+                                                                <li>
+                                    <a class="dropdown-item" href="../View/HistoricoSensor.html">
+                                        </i> Histórico de Sensores
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link item-navegacao" href="../View/Dashboards.html">Dashboard</a>
                         </li>
+
+
+
                         ` : ''}
 
                         <li class="nav-item">

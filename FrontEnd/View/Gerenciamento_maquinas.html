@@ -18,6 +18,9 @@
 
 <body>
 
+    <div id="particles-js"></div>
+
+
     <div id="menu-container"></div>
 
     <script type="module">
@@ -88,59 +91,52 @@
 
                                     <div class="modal_main" id="principal_modelo">
                                         <div class="number_one">
-
-
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Nome da
-                                                    Máquina</label>
-                                                <input type="text " class="form-control" id="nome"
+                                                <label for="nome" class="form-label">Nome da Máquina</label>
+                                                <input type="text" class="form-control" id="nome" name="Nome_Ativo"
                                                     placeholder="Digite o nome">
                                             </div>
 
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Descrição</label>
-                                                <input type="text " class="form-control" id="descricao"
+                                                <label for="descricao" class="form-label">Descrição</label>
+                                                <input type="text" class="form-control" id="descricao" name="Descricao"
                                                     placeholder="Digite a Descrição">
                                             </div>
 
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Fabricante</label>
-                                                <input type="text " class="form-control" id="fabricante"
-                                                    placeholder="Digite o Fabricante">
+                                                <label for="fabricante" class="form-label">Fabricante</label>
+                                                <input type="text" class="form-control" id="fabricante"
+                                                    name="Fabricante" placeholder="Digite o Fabricante">
                                             </div>
 
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Modelo</label>
-                                                <input type="text " class="form-control" id="modelo"
+                                                <label for="modelo" class="form-label">Modelo</label>
+                                                <input type="text" class="form-control" id="modelo" name="Modelo"
                                                     placeholder="Digite o Modelo">
                                             </div>
                                         </div>
 
-
                                         <div class="number_two">
-
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Numero de
-                                                    série</label>
-                                                <input type="text " class="form-control" id="numero"
+                                                <label for="numero" class="form-label">Numero de série</label>
+                                                <input type="text" class="form-control" id="numero" name="Numero_Serie"
                                                     placeholder="Digite o Numero de série">
                                             </div>
 
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Data de
-                                                    aquisição</label>
-                                                <input type="date" class="form-control" id="data">
+                                                <label for="data" class="form-label">Data de aquisição</label>
+                                                <input type="date" class="form-control" id="data" name="Data_Aquisicao">
                                             </div>
 
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Local</label>
-                                                <input type="text " class="form-control" id="local"
+                                                <label for="local" class="form-label">Local</label>
+                                                <input type="text" class="form-control" id="local" name="Localizacao"
                                                     placeholder="Digite o local">
                                             </div>
 
                                             <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                                <label for="inputAddress formFile" class="form-label">Status</label>
-                                                <select class="form-select" id="status">
+                                                <label for="status" class="form-label">Status</label>
+                                                <select class="form-select" id="status" name="Status">
                                                     <option value="ativo">Ativo</option>
                                                     <option value="inativo">Inativo</option>
                                                     <option value="em manutenção">Em Manutenção</option>
@@ -152,9 +148,9 @@
 
                                     <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
                                         <label for="foto_ativo" class="form-label">Imagem</label>
-                                        <input type="file" class="form-control" id="foto_ativo" accept="image/*">
+                                        <input type="file" class="form-control" id="foto_ativo" name="Imagem"
+                                            accept="image/*">
                                     </div>
-
 
                                     <div class="modal-footer" id="rodape_modelo">
                                         <button type="button" class="btn btn-secondary"
@@ -332,22 +328,21 @@
 
                         <div>
                             <label class="form-label fw-bold">Filtrar por Status:</label>
-                            <div class="list-group">
+                            <div id="filtroStatusContainer" class="list-group">
                                 <button type="button" class="list-group-item list-group-item-action"
-                                    onclick="filtrarPorStatus('ativo')">Ativo</button>
+                                    data-status="ativo">Ativo</button>
                                 <button type="button" class="list-group-item list-group-item-action"
-                                    onclick="filtrarPorStatus('inativo')">Inativo</button>
+                                    data-status="inativo">Inativo</button>
                                 <button type="button" class="list-group-item list-group-item-action"
-                                    onclick="filtrarPorStatus('em manutenção')">Em Manutenção</button>
+                                    data-status="em manutencao">Em Manutenção</button>
                                 <button type="button" class="list-group-item list-group-item-action"
-                                    onclick="filtrarPorStatus('condenado')">Condenado</option>
+                                    data-status="condenado">Condenado</button>
                             </div>
                         </div>
 
                         <hr>
 
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary" id="aplicar_filtros">Aplicar Filtros</button>
                             <button class="btn btn-outline-secondary" id="limpar_filtros">Limpar Filtros</button>
                         </div>
                     </div>
@@ -400,20 +395,86 @@
 
     <div class="container text-center mt-5" id="button_main">
         <div class="d-flex justify-content-center align-items-center mt-4">
-            <button class="arrow-btn" id="prevBtn" onclick="changePage(currentPage - 1)">
+            <button class="arrow-btn" id="prevBtn">
                 <i class="fa-solid fa-arrow-left"></i>
             </button>
-
-            <div id="paginationLines"></div> <button class="arrow-btn" id="nextBtn"
-                onclick="changePage(currentPage + 1)">
+            <div id="paginationLines"></div>
+            <button class="arrow-btn" id="nextBtn">
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
-
         <div class="mt-3">
-            <p id="content">Page 1</p>
+            <p id="content">Página 1</p>
         </div>
     </div>
+
+
+    <div class="modal fade" id="modalModelos3D" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modelos 3D do Ativo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Modelos Já Vinculados</h6>
+                    <div class="table-responsive" style="max-height: 200px;">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Arquivo</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modelosVinculadosBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                    <h6>Vincular Novo Modelo 3D</h6>
+                    <form id="formNovoModelo">
+                        <div class="mb-3">
+                            <label for="nomeModeloInput" class="form-label">Nome do Modelo</label>
+                            <input type="text" class="form-control" id="nomeModeloInput"
+                                placeholder="Ex: Motor Principal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="selectArquivoModelo" class="form-label">Arquivo do Modelo (.glb, .obj,
+                                etc)</label>
+                            <select class="form-select" id="selectArquivoModelo" required>
+                                <option value="" selected disabled>Carregando arquivos...</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Vincular Modelo</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirmar Ação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmModalBody">
+                    Você tem certeza que deseja executar esta ação?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmModalBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  Particula  -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
 
     <script src="../JS/Geren_Maquina.js"></script>

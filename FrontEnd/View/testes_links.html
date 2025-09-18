@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste de Links - Uploads</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
+    .ok { color: #4caf50; }
+    .erro { color: #f44336; }
+  </style>
+</head>
+<body>
+  <h1>Teste de Links - Pasta Uploads</h1>
+  <p>Verificando se os arquivos realmente estão disponíveis no GitHub Pages...</p>
+  <ul id="resultados"></ul>
+
+  <script>
+    // 🔧 LISTE AQUI OS NOMES DOS ARQUIVOS QUE VOCÊ QUER TESTAR
+    const arquivos = [
+      "280773cj_-_conj._mini_prensa_hidraulica.glb",
+      "centrifugal_pump__bomba_centrifuga.glb",
+      "conveyor_belt.glb",
+      "electric_motor.glb",   // <-- adicione os novos aqui
+      "empilhadeira_generica_v1.glb",
+      "motor_eletrico.glb",
+      "simple_rubber_conveyor.glb",
+      "torno_logan_ejcs.glb",
+    ];
+
+    const URL_BASE = "https://icaro-l-souza.github.io/visualizador_ar/Uploads/";
+    const lista = document.getElementById("resultados");
+
+    arquivos.forEach(async (arquivo) => {
+      const url = URL_BASE + arquivo;
+      try {
+        const resp = await fetch(url, { method: "HEAD" });
+        const li = document.createElement("li");
+        if (resp.ok) {
+          li.innerHTML = `<span class="ok">✅ Disponível:</span> <a href="${url}" target="_blank">${arquivo}</a>`;
+        } else {
+          li.innerHTML = `<span class="erro">❌ Erro ${resp.status}:</span> ${arquivo}`;
+        }
+        lista.appendChild(li);
+      } catch (e) {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="erro">❌ Falha:</span> ${arquivo} (${e.message})`;
+        lista.appendChild(li);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -102,7 +102,7 @@
             </div>
         </div>
 
-       
+
         <!-- Card: Status dos Ativos (com container dinâmico) -->
         <div class="card-dashboard">
             <div class="card-header">
@@ -200,13 +200,14 @@
         </div>
     </section>
 
-        <!-- Modal para Resposta do Gemini -->
+    <!-- Modal para Resposta do Gemini -->
     <div class="modal fade" id="geminiAnalysisModal" tabindex="-1" aria-labelledby="geminiModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content modal-content-ai">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="geminiModalLabel"><i class="fas fa-brain me-2"></i>Análise de Diagnóstico por IA</h5>
+                    <h5 class="modal-title" id="geminiModalLabel"><i class="fas fa-brain me-2"></i>Análise de
+                        Diagnóstico por IA</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -222,6 +223,45 @@
         </div>
     </div>
 
+     <!-- Container do Assistente de IA -->
+    <div id="ai-chatbot-container">
+        <!-- O Mascote Robô -->
+        <div id="ai-chatbot-fab" class="ai-fab">
+            <div class="ai-robot-mascot">
+                <div class="ai-robot-shadow"></div>
+                <div class="ai-robot-arm left"></div>
+                <div class="ai-robot-arm right"></div>
+                <div class="ai-robot-body"></div>
+                <div class="ai-robot-head">
+                    <div class="ai-robot-screen">
+                        <div class="ai-robot-eye left"></div>
+                        <div class="ai-robot-eye right"></div>
+                    </div>
+                </div>
+            </div>
+             <div class="ai-speech-bubble">
+                <p>Precisa de ajuda? <br> Clique em mim!</p>
+            </div>
+        </div>
+    
+        <!-- ATUALIZAÇÃO: Janela de Chat (agora com conteúdo) -->
+        <div id="ai-chat-window" class="ai-chat-window">
+            <div class="chat-header">
+                <h5>Assistente SGMI</h5>
+                <button id="ai-chat-close-btn" class="btn-close btn-close-white"></button>
+            </div>
+            <div id="ai-chat-messages" class="chat-messages">
+                <!-- Mensagem de boas-vindas -->
+                <div class="message ai-message">
+                    <p>Olá! Sou a Aura, assistente virtual do SGMI. Como posso ajudar você hoje?</p>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="ai-chat-input" class="form-control" placeholder="Digite sua pergunta...">
+                <button id="ai-chat-send-btn" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
 
 
 </body>

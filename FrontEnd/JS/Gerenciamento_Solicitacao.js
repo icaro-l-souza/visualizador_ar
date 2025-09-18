@@ -1,254 +1,252 @@
-let statusSelecionado = null;
-let prioridadeSelecionada = null;
+// =================== VARIÁVEIS GLOBAIS DE ESTADO ===================
+let allSolicitacoes = [];
+let filteredSolicitacoes = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+let solicitacaoParaExcluirId = null;
 
-// ------------------------- FILTRAR POR STATUS -------------------------
-function filtrarPorStatus(status, event) {
-    if (event) event.stopPropagation();
-    const statusValidos = ['Aceita', 'Recusada', 'Analise'];
+// =================== FUNÇÕES DE EXPORTAÇÃO E AUXILIARES ===================
 
-    if (status !== null && !statusValidos.includes(status)) {
-        console.error("[Checkpoint] Erro: Status inválido");
+window.exportar = function (formato, scope) {
+    const dadosDaPagina = filteredSolicitacoes.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const dadosParaExportar = scope === 'tudo' ? filteredSolicitacoes : dadosDaPagina;
+
+    if (dadosParaExportar.length === 0) {
+        exibirMensagemGeral("Nenhum dado para exportar.", "warning");
         return;
     }
 
-    statusSelecionado = status;
+    const colunas = ["ID", "ID Ativo", "Título", "Solicitante", "Descrição", "Prioridade", "Status"];
+    const linhas = dadosParaExportar.map(s => [
+        s.id_Solicitacao, s.id_Ativo, s.Titulo, s.Solicitante, s.Problema, s.Prioridade, s.Status
+    ]);
 
-    // Atualiza os botões "active" (apenas os de status)
-    document.querySelectorAll('.filter-dropdown .filter-btn:not(.prioridade-btn)').forEach(btn => {
-        btn.classList.remove('active');
-        const texto = btn.textContent.trim().toLowerCase();
-        if ((status === null && texto.includes('mostrar todas')) ||
-            (status !== null && texto.includes(status.toLowerCase()))) {
-            btn.classList.add('active');
+    if (formato === 'excel') {
+        const worksheet = XLSX.utils.aoa_to_sheet([colunas, ...linhas]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Solicitações");
+        XLSX.writeFile(workbook, `solicitacoes_${scope}.xlsx`);
+    } else // CÓDIGO CORRIGIDO (Com as cores)
+        if (formato === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF("l", "pt", "a4");
+
+            // Adicionando o objeto de estilos que faltava
+            doc.autoTable({
+                head: [colunas],
+                body: linhas,
+                headStyles: {
+                    fillColor: [52, 58, 64],      // Cor de fundo do cabeçalho (cinza escuro)
+                    textColor: [255, 255, 255]   // Cor do texto (branco)
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 240, 240]   // Cor das linhas alternadas (cinza claro)
+                }
+            });
+            doc.save(`solicitacoes_${scope}.pdf`);
         }
-    });
-
-    // LÓGICA CORRIGIDA: Carrega os dados imediatamente e fecha o dropdown
-    carregarSolicitacoes(statusSelecionado, prioridadeSelecionada);
-    fecharDropdown();
 }
 
-// ------------------------- FILTRAR POR PRIORIDADE -------------------------
-function filtrarPorPrioridade(prioridade, event) {
-    if (event) event.stopPropagation();
-    const prioridadesValidas = ['Alta', 'Media', 'Baixa'];
+// =================== LÓGICA PRINCIPAL ===================
+document.addEventListener('DOMContentLoaded', function () {
 
-    if (prioridade !== null && !prioridadesValidas.includes(prioridade)) {
-        console.error("[Checkpoint] Erro: Prioridade inválida");
-        return;
+    // --- FUNÇÕES DE CARREGAMENTO E FILTROS ---
+
+    async function carregarSolicitacoes() {
+        const tbody = document.getElementById('solicitacaoTableBody');
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center">Carregando...</td></tr>`;
+        try {
+            const response = await fetch('http://localhost:5000/solicitacoes');
+            if (!response.ok) throw new Error('Falha ao carregar solicitações.');
+            allSolicitacoes = await response.json();
+            aplicarFiltrosERenderizar();
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger">${error.message}</td></tr>`;
+        }
     }
 
-    prioridadeSelecionada = prioridade;
+    function aplicarFiltrosERenderizar() {
+        let tempSolicitacoes = [...allSolicitacoes];
 
-    // Atualiza os botões "active" (apenas os de prioridade)
-    document.querySelectorAll('.filter-dropdown .prioridade-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const texto = btn.textContent.trim().toLowerCase();
-        if ((prioridade === null && texto.includes('todas as prioridades')) ||
-            (prioridade !== null && texto.includes(prioridade.toLowerCase()))) {
-            btn.classList.add('active');
+        const titulo = document.getElementById('filtroTitulo').value.toLowerCase();
+        if (titulo) {
+            tempSolicitacoes = tempSolicitacoes.filter(s => s.Titulo.toLowerCase().includes(titulo));
         }
-    });
 
-    // LÓGICA CORRIGIDA: Carrega os dados imediatamente e fecha o dropdown
-    carregarSolicitacoes(statusSelecionado, prioridadeSelecionada);
-    fecharDropdown();
-}
+        const statusAtivo = document.querySelector('#filtroStatusContainer .list-group-item.active');
+        if (statusAtivo) {
+            const status = statusAtivo.getAttribute('data-status');
+            tempSolicitacoes = tempSolicitacoes.filter(s => s.Status === status);
+        }
 
+        const prioridadeAtiva = document.querySelector('#filtroPrioridadeContainer .list-group-item.active');
+        if (prioridadeAtiva) {
+            const prioridade = prioridadeAtiva.getAttribute('data-prioridade');
+            tempSolicitacoes = tempSolicitacoes.filter(s => s.Prioridade === prioridade);
+        }
 
-// ------------------------- Carregar Solicitacoes com Filtro -------------------------
-async function carregarSolicitacoes(filtroStatus = null, filtroPrioridade = null) {
-    const mensagemDiv = document.getElementById('mensagemErro');
-    mensagemDiv.classList.add('d-none');
+        filteredSolicitacoes = tempSolicitacoes;
+        currentPage = 1;
+        createPagination();
+        changePage(1);
+    }
 
-    try {
-        const response = await fetch('http://localhost:5000/solicitacoes');
-        const solicitacoes = await response.json();
+    // --- RENDERIZAÇÃO E PAGINAÇÃO ---
 
-        const tbody = document.querySelector('tbody');
-        tbody.innerHTML = '';
+    function renderTableRows() {
+        const tbody = document.getElementById('solicitacaoTableBody');
+        tbody.innerHTML = "";
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const dadosPagina = filteredSolicitacoes.slice(start, end);
 
-        // Função para normalizar status
-        const normalizarStatus = (status) => {
-            if (!status) return null;
-            if (status.toLowerCase() === "analise") return "em analise";
-            return status.toLowerCase();
-        };
+        if (dadosPagina.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center">Nenhuma solicitação encontrada.</td></tr>`;
+            return;
+        }
 
-        const solicitacoesFiltradas = solicitacoes.filter(s => {
-            const statusOK = !filtroStatus || s.Status.toLowerCase() === normalizarStatus(filtroStatus);
-            const prioridadeOK = !filtroPrioridade || s.Prioridade.toLowerCase() === filtroPrioridade.toLowerCase();
-            return statusOK && prioridadeOK;
-        });
-
-        solicitacoesFiltradas.forEach(solicitacao => {
+        dadosPagina.forEach(s => {
             const row = document.createElement('tr');
-
             let botoesAcao = '';
-
-            if (solicitacao.Status === 'Em Analise') {
+            if (s.Status === 'Em Analise') {
                 botoesAcao = `
-                <button class="delete-btn btn btn-success btn-sm" onclick="aceitarSolicitacao(${solicitacao.id_Solicitacao})">
-                    <i class="fa-solid fa-check"></i>
-                </button>
-                <button class="edit-btn btn btn-danger btn-sm" onclick="recusarSolicitacao(${solicitacao.id_Solicitacao})">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                <button class="delete-btn-soli" onclick="confirmDeleteSolicitacaoBtn(${solicitacao.id_Solicitacao})">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            `;
-            } else if (solicitacao.Status === 'Aceita' || solicitacao.Status === 'Recusada') {
+                    <button class="aceitar-btn" onclick="aceitarSolicitacao(${s.id_Solicitacao})"><i class="fa-solid fa-check"></i></button>
+                    <button class="recusar-btn" onclick="recusarSolicitacao(${s.id_Solicitacao})"><i class="fa-solid fa-xmark"></i></button>
+                    <button class="delete-btn-soli" onclick="confirmarExclusaoSolicitacao(${s.id_Solicitacao})"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+            } else {
                 botoesAcao = `
-                <button class="delete-btn-soli" onclick="confirmarExclusaoSolicitacao(${solicitacao.id_Solicitacao})">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            `;
+                    <button class="delete-btn-soli" onclick="confirmarExclusaoSolicitacao(${s.id_Solicitacao})"><i class="fa-solid fa-trash-can"></i></button>
+                `;
             }
 
             row.innerHTML = `
                 <td id="total"></td>
-                <td>${solicitacao.id_Solicitacao}</td>
-                <td>${solicitacao.id_Ativo}</td>
-                <td>${solicitacao.Titulo}</td>
-                <td>${solicitacao.Solicitante}</td>
-                <td>${solicitacao.Problema}</td>
-                <td>${solicitacao.Prioridade}</td>
-                <td>${solicitacao.Status}</td>
-                <td id="center">
-                    ${botoesAcao}
-                </td>
+                <td>${s.id_Solicitacao}</td>
+                <td>${s.id_Ativo}</td>
+                <td>${s.Titulo}</td>
+                <td>${s.Solicitante}</td>
+                <td>${s.Problema}</td>
+                <td>${s.Prioridade}</td>
+                <td>${s.Status}</td>
+                <td id="center">${botoesAcao}</td>
             `;
             tbody.appendChild(row);
         });
-    } catch (error) {
-        mensagemDiv.textContent = 'Erro ao carregar solicitações: ' + error.message;
+    }
+
+    function createPagination() {
+        const paginationContainer = document.getElementById("paginationLines");
+        const totalPages = Math.ceil(filteredSolicitacoes.length / rowsPerPage) || 1;
+        paginationContainer.innerHTML = "";
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.className = "btn";
+            btn.innerHTML = `<hr class="page-line" id="line${i}">`;
+            btn.onclick = () => changePage(i);
+            paginationContainer.appendChild(btn);
+        }
+    }
+
+    function changePage(pageNumber) {
+        const totalPages = Math.ceil(filteredSolicitacoes.length / rowsPerPage) || 1;
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageNumber > totalPages) pageNumber = totalPages;
+
+        currentPage = pageNumber;
+        renderTableRows();
+
+        document.getElementById("content").innerText = "Página " + currentPage;
+        document.querySelectorAll(".page-line").forEach(line => line.classList.remove("active-line"));
+        const currentLine = document.getElementById("line" + currentPage);
+        if (currentLine) currentLine.classList.add("active-line");
+
+        document.getElementById("prevBtn").disabled = (currentPage === 1);
+        document.getElementById("nextBtn").disabled = (currentPage === totalPages);
+    }
+
+    // --- LÓGICA DE AÇÕES ---
+
+    window.confirmarExclusaoSolicitacao = function (id) {
+        solicitacaoParaExcluirId = id;
+        document.getElementById('deleteSolicitacaoId').textContent = id;
+        const modal = new bootstrap.Modal(document.getElementById('deleteSolicitacaoModal'));
+        modal.show();
+    }
+
+    async function executarExclusao() {
+        if (!solicitacaoParaExcluirId) return;
+        try {
+            const response = await fetch(`http://localhost:5000/delete_solicitacoes/${solicitacaoParaExcluirId}`, { method: 'DELETE' });
+            const data = await response.json();
+            if (!response.ok || !data.affected_rows) throw new Error(data.mensagem || 'Erro ao excluir.');
+
+            exibirMensagemGeral("Solicitação excluída com sucesso!", "success");
+            await carregarSolicitacoes();
+        } catch (error) {
+            exibirMensagemGeral(error.message, "danger");
+        } finally {
+            bootstrap.Modal.getInstance(document.getElementById('deleteSolicitacaoModal')).hide();
+            solicitacaoParaExcluirId = null;
+        }
+    }
+
+    async function atualizarStatus(id, novoStatus) {
+        try {
+            const response = await fetch('http://localhost:5000/atualizar_status_solicitacao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_Solicitacao: id, Status: novoStatus })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || 'Erro desconhecido.');
+
+            exibirMensagemGeral(`Solicitação ${novoStatus.toLowerCase()}a com sucesso!`, "success");
+            await carregarSolicitacoes();
+        } catch (error) {
+            exibirMensagemGeral(`Erro ao ${novoStatus.toLowerCase()}r a solicitação: ` + error.message, "danger");
+        }
+    }
+
+    window.aceitarSolicitacao = (id) => atualizarStatus(id, "Aceita");
+    window.recusarSolicitacao = (id) => atualizarStatus(id, "Recusada");
+
+    // --- FUNÇÕES AUXILIARES ---
+    function exibirMensagemGeral(mensagem, tipo = 'danger') {
+        const mensagemDiv = document.getElementById('mensagemErro');
+        mensagemDiv.textContent = mensagem;
+        mensagemDiv.className = `alert alert-${tipo}`;
         mensagemDiv.classList.remove('d-none');
+        setTimeout(() => mensagemDiv.classList.add('d-none'), 4000);
     }
-}
 
-// ------------------------- Executar ao iniciar -------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    // Apenas carrega todos os dados inicialmente
-    carregarSolicitacoes(null, null);
-});
-// ------------------------- Fechar o dropdown -------------------------
-function fecharDropdown() {
-    const dropdownToggle = document.getElementById('filterDropdown');
-    // Verifica se o dropdown existe antes de tentar manipulá-lo
-    if (dropdownToggle) {
-        const dropdownInstance = bootstrap.Dropdown.getOrCreateInstance(dropdownToggle);
-        dropdownInstance.hide();
-    }
-}
+    // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+    carregarSolicitacoes();
 
-// ------------------------- Deletar Solicitação ----------------------------------------
-let solicitacaoParaExcluirId = null;
+    document.getElementById('filtroTitulo').addEventListener('input', aplicarFiltrosERenderizar);
 
-// Abre o modal e exibe o ID da solicitação
-function confirmarExclusaoSolicitacao(id) {
-    solicitacaoParaExcluirId = id;
-    document.getElementById('deleteSolicitacaoId').textContent = id;
-    const modal = new bootstrap.Modal(document.getElementById('deleteSolicitacaoModal'));
-    modal.show();
-}
-
-// Botão "Excluir" dentro do modal
-document.getElementById('confirmDeleteSolicitacaoBtn').addEventListener('click', () => {
-    if (solicitacaoParaExcluirId !== null) {
-        deletarSolicitacao(solicitacaoParaExcluirId);
-    }
-});
-
-// Função para exclusão
-async function deletarSolicitacao(id) {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteSolicitacaoModal'));
-
-    try {
-        const response = await fetch(`http://localhost:5000/delete_solicitacoes/${id}`, {
-            method: 'DELETE'
+    document.querySelectorAll('#filtroStatusContainer .list-group-item, #filtroPrioridadeContainer .list-group-item').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const container = this.closest('.list-group');
+            if (this.classList.contains('active')) {
+                this.classList.remove('active');
+            } else {
+                container.querySelectorAll('.list-group-item').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            }
+            aplicarFiltrosERenderizar();
         });
+    });
 
-        const data = await response.json();
+    document.getElementById('limparFiltros').addEventListener('click', () => {
+        document.getElementById('filtroTitulo').value = '';
+        document.querySelectorAll('.list-group-item.active').forEach(b => b.classList.remove('active'));
+        aplicarFiltrosERenderizar();
+    });
 
-        if (!response.ok || !data.affected_rows) {
-            alert(`Erro: ${data.mensagem || 'Solicitação não encontrada ou vinculada a uma ordem.'}`);
-            return;
-        }
+    document.getElementById('prevBtn').addEventListener('click', () => changePage(currentPage - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => changePage(currentPage + 1));
 
-        modal.hide();
-        alert("Solicitação excluída com sucesso!");
-
-        // Recarregar lista
-        carregarSolicitacoes(statusSelecionado, prioridadeSelecionada);
-
-    } catch (error) {
-        modal.hide();
-        alert("Erro ao excluir solicitação: " + error.message);
-    }
-};
-
-
-// ------------------------- Aceitar Solicitação -------------------------
-async function aceitarSolicitacao(idSolicitacao) {
-    const confirmacao = confirm("Deseja aceitar esta solicitação?");
-    if (!confirmacao) return;
-
-    try {
-        const response = await fetch('http://localhost:5000/atualizar_status_solicitacao', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_Solicitacao: idSolicitacao,
-                Status: "Aceita"
-            })
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-            alert("Solicitação aceita com sucesso!");
-            carregarSolicitacoes(statusSelecionado, prioridadeSelecionada); // Recarrega com os filtros atuais
-        } else {
-            alert("Erro ao aceitar solicitação: " + (data.message || 'Erro desconhecido.'));
-        }
-    } catch (error) {
-        console.error("Erro ao aceitar solicitação:", error);
-        alert("Erro na conexão com o servidor.");
-    }
-}
-
-// ------------------------- Recusar Solicitação -------------------------
-async function recusarSolicitacao(idSolicitacao) {
-    const confirmacao = confirm("Deseja recusar esta solicitação?");
-    if (!confirmacao) return;
-
-    try {
-        const response = await fetch('http://localhost:5000/atualizar_status_solicitacao', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_Solicitacao: idSolicitacao,
-                Status: "Recusada"
-            })
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-            alert("Solicitação recusada com sucesso!");
-            carregarSolicitacoes(statusSelecionado, prioridadeSelecionada); // Recarrega com os filtros atuais
-        } else {
-            alert("Erro ao recusar solicitação: " + (data.message || 'Erro desconhecido.'));
-        }
-    } catch (error) {
-        console.error("Erro ao recusar solicitação:", error);
-        alert("Erro na conexão com o servidor.");
-    }
-}
-
-// ------------------------- Executar ao iniciar -------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    // Define o estado inicial e carrega os dados
-    filtrarPorStatus(null);
-    filtrarPorPrioridade(null);
-    carregarSolicitacoes(null, null); // Carrega todos os dados na primeira vez
+    document.getElementById('confirmDeleteSolicitacaoBtn').addEventListener('click', executarExclusao);
 });

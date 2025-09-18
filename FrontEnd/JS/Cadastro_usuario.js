@@ -1,188 +1,132 @@
+// =========================================================================
+// SCRIPT COMPLETO E REFINADO
+// =========================================================================
+
 document.addEventListener('DOMContentLoaded', function () {
 
+    // --- FUNÇÃO AUXILIAR PARA EXIBIR MENSAGENS ---
+    function exibirMensagem(texto, tipo = 'danger') {
+        const mensagemDiv = document.getElementById('mensagem');
+        if (mensagemDiv) {
+            mensagemDiv.textContent = texto;
+            mensagemDiv.className = `alert alert-${tipo} mx-3`; // Garante as classes corretas
+            mensagemDiv.classList.remove('d-none');
+            
+            // Esconde a mensagem após 5 segundos
+            setTimeout(() => {
+                mensagemDiv.classList.add('d-none');
+            }, 5000);
+        }
+    }
+
+    // --- LÓGICA DE BUSCA DE CEP ---
     document.getElementById('inputCEP').addEventListener('blur', async function () {
         const cep = this.value.replace(/\D/g, '');
-
-        const ruaInput = document.getElementById('inputRua');
-        const bairroInput = document.getElementById('inputBairro');
-        const cidadeInput = document.getElementById('inputCidade');
 
         if (cep.length === 8) {
             try {
                 const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
-
                 if (!response.ok) {
-                    throw new Error('CEP não encontrado');
+                    throw new Error('CEP não encontrado ou inválido.');
                 }
-
                 const data = await response.json();
 
-                if (ruaInput) ruaInput.value = data.street || '';
-                if (bairroInput) bairroInput.value = data.neighborhood || '';
-                if (cidadeInput) cidadeInput.value = data.city || '';
+                document.getElementById('inputRua').value = data.street || '';
+                document.getElementById('inputBairro').value = data.neighborhood || '';
+                document.getElementById('inputCidade').value = data.city || '';
 
             } catch (error) {
-                alert('Erro ao buscar o CEP: ' + error.message);
-
-                if (ruaInput) ruaInput.value = '';
-                if (bairroInput) bairroInput.value = '';
-                if (cidadeInput) cidadeInput.value = '';
+                exibirMensagem('Erro ao buscar o CEP: ' + error.message, 'danger');
+                document.getElementById('inputRua').value = '';
+                document.getElementById('inputBairro').value = '';
+                document.getElementById('inputCidade').value = '';
             }
+        } else if (this.value.length > 0) {
+            exibirMensagem('CEP inválido. Deve conter 8 números.', 'warning');
         }
     });
 
-
-    // Lógica do formulário
+    // --- LÓGICA DO FORMULÁRIO DE CADASTRO ---
     document.getElementById('userForm').addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        // Captura os valores dos campos
-        const nome = document.getElementById('inputName').value;
-        const cep = document.getElementById('inputCEP').value;
-        const numero = document.getElementById('inputNumero').value;
-        const complemento = document.getElementById('inputComplemento').value;
-        const data_nascimento = document.getElementById('inputDate').value;
-        const tipo = document.getElementById('inputtipo').value;
-        const email = document.getElementById('inputEmail').value;
-        const username = document.getElementById('inputUsername').value;
-        const sexo = document.getElementById('inputSexo').value;
-        const cpf = document.getElementById('inputCPF').value;
-        const telefone = document.getElementById('inputPhone').value;
-        const senha = document.getElementById('inputSenha').value;
-        const cidade = document.getElementById('inputCidade').value;
-        const bairro = document.getElementById('inputBairro').value;
-        const rua = document.getElementById('inputRua').value;
-        const cargo = document.getElementById('inputCargo').value;
-        const departamento = document.getElementById('inputDepartamento').value;
-        const admissao = document.getElementById('inputAdmissao').value;
-        const fotoInput = document.getElementById('foto_usuario');
-        const arquivo = fotoInput.files[0]; // O arquivo real selecionado
-
-        // Validação básica
-        if (!nome || !cep || !numero || !complemento || !data_nascimento || !tipo || !email || !username || !sexo || !cpf || !telefone || !senha || !cidade || !bairro || !rua || !cargo || !departamento || !admissao) {
-            alert('Todos os campos são obrigatórios. Por favor, preencha todos.');
+        const formData = new FormData(this);
+        let campoFaltando = false;
+        // Verifica se algum campo essencial está vazio
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'Complemento' && key !== 'Foto_Usuario' && !value) {
+                campoFaltando = true;
+                break;
+            }
+        }
+        
+        if (campoFaltando) {
+            exibirMensagem('Por favor, preencha todos os campos obrigatórios.', 'warning');
             return;
+        }
+
+        // Adiciona campos fixos ao FormData
+        formData.append("table", "cadastro_funcionario");
+        formData.append("database", "sgmi");
+        
+        // Se a foto não foi selecionada, remove do FormData
+        if (formData.get('Foto_Usuario') && formData.get('Foto_Usuario').size === 0) {
+            formData.delete('Foto_Usuario');
         }
 
         try {
-            await enviarFormulario(nome, cep, numero, complemento, data_nascimento, tipo, email, username, sexo, cpf, telefone, senha, cidade, bairro, rua, cargo, departamento, admissao, arquivo);
+            const response = await fetch('http://localhost:5000/insert', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.inserted_id) {
+                const erroMsg = Array.isArray(data.mensagem) ? data.mensagem.join('<br>') : (data.mensagem || 'Erro desconhecido.');
+                throw new Error(erroMsg);
+            }
+            
+            exibirMensagem('Funcionário cadastrado com sucesso!', 'success');
+            document.getElementById('userForm').reset();
+            
+            const preview = document.getElementById('foto_preview');
+            if(preview) preview.style.display = 'none';
+
         } catch (error) {
-            const mensagemDiv = document.getElementById('mensagemErroInserir');
-            mensagemDiv.textContent = 'Erro de conexão com a API: ' + error.message;
-            mensagemDiv.classList.remove('d-none');
+            exibirMensagem('Erro: ' + error.message, 'danger');
         }
     });
+    
+    // --- LÓGICA DO PREVIEW DA IMAGEM ---
+    const fotoInput = document.getElementById('foto_usuario');
+    const fotoPreview = document.getElementById('foto_preview');
 
-    async function enviarFormulario(
-        nome, cep, numero, complemento, data_nascimento, tipo,
-        email, username, sexo, cpf, telefone, senha,
-        cidade, bairro, rua, cargo, departamento, admissao, arquivo
-    ) {
-        const formData = new FormData();
-
-        // Campos de texto
-        formData.append("table", "cadastro_funcionario");
-        formData.append("database", "sgmi");
-        formData.append("Nome", nome);
-        formData.append("Email", email);
-        formData.append("Senha", senha);
-        formData.append("Login", username);
-        formData.append("Telefone", telefone);
-        formData.append("CEP", cep);
-        formData.append("Cidade", cidade);
-        formData.append("Bairro", bairro);
-        formData.append("Rua", rua);
-        formData.append("Numero", numero);
-        formData.append("Complemento", complemento);
-        formData.append("Sexo", sexo);
-        formData.append("CPF", cpf);
-        formData.append("Data_Nascimento", data_nascimento);
-        formData.append("Tipo_Usuario", tipo);
-        formData.append("Cargo", cargo);
-        formData.append("Departamento", departamento);
-        formData.append("Data_Admissao", admissao);
-
-        // Imagem
-        formData.append("Foto_Usuario", arquivo);
-
-        // Envio
-        const response = await fetch('http://localhost:5000/insert', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-        const mensagemDiv = document.getElementById('mensagemErroInserir');
-
-        if (!response.ok || !data.inserted_id) {
-            if (Array.isArray(data.mensagem)) {
-                mensagemDiv.innerHTML = `Erro:<br>${data.mensagem.join('<br>')}`;
-            } else {
-                mensagemDiv.innerHTML = `Erro: ${data.mensagem || 'Erro desconhecido.'}`;
+    if (fotoInput && fotoPreview) {
+        fotoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoPreview.src = e.target.result;
+                    fotoPreview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
             }
-            mensagemDiv.classList.remove('d-none');
-            return;
-        }
-
-        mensagemDiv.classList.add('d-none');
-        alert('Funcionário cadastrado com sucesso!');
-        document.getElementById('userForm').reset();
+        });
     }
-
-
-    // Espera o DOM carregar
-    document.addEventListener('DOMContentLoaded', function () {
-
-        const inputCEP = document.getElementById('inputCEP');
-
-        inputCEP.addEventListener('blur', async function () {
-            const cep = inputCEP.value.replace(/\D/g, '');
-
-            if (cep.length !== 8) {
-                alert('CEP inválido. Deve conter 8 números.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-
-                if (data.erro) {
-                    alert('CEP não encontrado.');
-                    return;
-                }
-
-                // Preenche os campos automaticamente
-                document.getElementById('inputCidade').value = data.localidade;
-                document.getElementById('inputBairro').value = data.bairro;
-                document.getElementById('inputRua').value = data.logradouro;
-
-            } catch (error) {
-                alert('Erro ao buscar o CEP: ' + error.message);
-            }
-        });
-
-    });
-
 });
 
-// ------------------Senha--------------------------
-
+// --- LÓGICA DE MOSTRAR SENHA ---
 function mostrarSenha() {
-    var inputPass = document.getElementById('inputSenha')
-    var btnShowPass = document.getElementById('btn-senha')
+    const inputPass = document.getElementById('inputSenha');
+    const btnShowPass = document.getElementById('btn-senha');
 
     if (inputPass.type === 'password') {
-        inputPass.setAttribute('type', 'text')
-        btnShowPass.classList.replace('fa-eye', 'fa-eye-slash')
+        inputPass.setAttribute('type', 'text');
+        btnShowPass.classList.replace('fa-eye', 'fa-eye-slash');
     } else {
-        inputPass.setAttribute('type', 'password')
-        btnShowPass.classList.replace('fa-eye-slash', 'fa-eye')
+        inputPass.setAttribute('type', 'password');
+        btnShowPass.classList.replace('fa-eye-slash', 'fa-eye');
     }
-
 }
-
-

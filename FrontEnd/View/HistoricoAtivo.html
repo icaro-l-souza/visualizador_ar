@@ -1,250 +1,308 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
         integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-
     <link rel="stylesheet" href="../css/RelatorioAtivo.css">
-    <title>Relatorio</title>
+    <title>Relatório de Histórico de Ativos</title>
 </head>
 
 <body>
-
     <div id="menu-container"></div>
-
     <script type="module">
         import { loadMenu } from '../components/menu.js';
-
         document.addEventListener("DOMContentLoaded", () => {
             loadMenu();
         });
     </script>
 
-
-
     <section class="rt">
-
         <div class="container">
-
-
-
-
-            <div class="dropfiltro" id="dropfiltro">
-                <div class="dropfiltro-header">
-                    <h3>Filtrar</h3>
-                    <button class="close-btn" onclick="toggleDropdown(event)">&times;</button>
-                </div>
-                <div class="search-container">
-                    <i class="fa fa-search"></i>
-                    <input type="text" placeholder="Pesquisar...">
-                </div>
-                <div class="history-title">Histórico de Pesquisa</div>
-                <ul id="history">
-                    <li>Pesquisa 1</li>
-                    <li>Pesquisa 2</li>3
-                    <li>Pesquisa 3</li>
-                </ul>
+            <div class="titulo1">
+                <h2>Histórico de Ativos</h2>
             </div>
-
-        </div>
-    </section>
-
-
-    <!---------------------------------------------------------Relatório de Estoque de Peças---------------------------------------------->
-
-
-    <section>
-        <div class="container2">
-
-            <div class="titulo">
-                <h3>Históricos dos Ativos:</h3>
-                <div id="ButtonAdd">
-
-
-                    <button id="button_cascata" type="button" class="btn btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#modalCreate">
-                        Add <i class="fa-solid fa-circle-plus" id="button_cascata2"></i>
+            <div id="mensagemGeral" class="alert d-none" role="alert"></div>
+            <div class="geral">
+                <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Exportar
                     </button>
-
+                    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                        <li>
+                            <h6 class="dropdown-header">Exportar tudo (filtrado):</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="exportar('excel', 'tudo')">Excel Completo</a>
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="exportar('pdf', 'tudo')">PDF Completo</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <h6 class="dropdown-header">Exportar página atual:</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="exportar('excel', 'pagina')">Excel da Página</a>
+                        </li>
+                        <li><a class="dropdown-item" href="#" onclick="exportar('pdf', 'pagina')">PDF da Página</a></li>
+                    </ul>
                 </div>
-            </div>
-            <!--formulario modal-->
-            <form id="formulario">
-                <div class="modal fade" id="modalCreate" tabindex="-1" aria-labelledby="modalCreateLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="modalCreateLabel">Registro de Histórico Ativo</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
 
-                            <div class="modal-body">
-                                <div id="mensagemSucesso" class="alert alert-success d-none" role="alert"></div>
-                                <div id="mensagemErroInserir" class="alert alert-danger d-none" role="alert"></div>
+                <button id="button_cascata" type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#modalCreate">
+                    Add <i class="fa-solid fa-circle-plus" id="button_cascata2"></i>
+                </button>
 
-                                <div class="modal_main" id="principal_modelo">
-                                    <div class="number_one">
-
-
-                                        <!--Form Ativo ------------------------------------------------------------->
-
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label for="inputAddress formFile" class="form-label">ID Ativo</label>
-                                            <input type="text " class="form-control" id="IDOrdem"
-                                                placeholder="Digite o Id da ordem">
-                                        </div>
-                                        <!--Form Data Evento------------------------------------------------------------->
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label for="inputAddress formFile" class="form-label">Data Evento</label>
-                                            <input type="date" class="form-control" id="Duracao"
-                                                placeholder="Digite o tipo de Manutenção">
-                                        </div>
-
-                                        <!--Form Status Anterior------------------------------------------------------------->
-
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label class="form-label">Status Anterior</label>
-                                            <select class="form-select" id="Status">
-                                                <option>Ativo</option>
-                                                <option>Inativo</option>
-                                                <option>Em Manutenção</option>
-                                                <option>Condenado</option>
-                                            </select>
-                                        </div>
-
-
-
-
-                                        <!--Form Status------------------------------------------------------------->
-
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label class="form-label">Status Novo</label>
-                                            <select class="form-select" id="Status">
-                                                <option>Ativo</option>
-                                                <option>Inativo</option>
-                                                <option>Em Manutenção</option>
-                                                <option>Condenado</option>
-                                            </select>
-                                        </div>
-
-
-
-
-                                    </div>
-
-
-                                    <div class="number_two">
-                                        <!--Form Localização Anterior------------------------------------------------------------->
-
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label for="inputAddress formFile" class="form-label">Loc. Anterior</label>
-                                            <input type="text" class="form-control" id="Numerracao"
-                                                placeholder="Digite a antiga localização">
-                                        </div>
-
-                                        <!--Form Localização atual------------------------------------------------------------->
-
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label for="inputAddress formFile" class="form-label">Loc. Atual</label>
-                                            <input type="text" class="form-control" id="Numerracao"
-                                                placeholder="Digite a nova localização">
-                                        </div>
-
-                                        <!--Form Address------------------------------------------------------------->
-
-                                        <div class="col-12 mb-3 modal-body" id="Corpo_modelo">
-                                            <label for="inputAddress formFile" class="form-label">Observações</label>
-                                            <input type="text " class="form-control" id="Observacao"
-                                                placeholder="Digite as Observações">
-                                        </div>
-
-
-
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-                            <div class="modal-footer" id="rodape_modelo">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn" id="save_cadastro">Save changes</button>
-                            </div>
+                <div class="dropdown">
+                    <a href="#" class="icon-filter" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-filter fa-2x"></i>
+                    </a>
+                    <div class="dropdown-menu p-3 filter-dropdown" style="min-width: 250px;"
+                        aria-labelledby="filterDropdown">
+                        <div class="mb-3">
+                            <label for="search_input" class="form-label fw-bold">Pesquisar por Observação:</label>
+                            <input type="text" class="form-control" id="search_input"
+                                placeholder="Digite o texto da observação">
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label for="filtro_status" class="form-label fw-bold">Filtrar por Status Novo:</label>
+                            <select class="form-select" id="filtro_status">
+                                <option value="">Todos</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="em manutencao">Em Manutenção</option>
+                                <option value="condenado">Condenado</option>
+                            </select>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-secondary" id="limpar_filtros">Limpar Filtros</button>
                         </div>
                     </div>
                 </div>
+            </div>
         </div>
-        </form>
-        <!--Tabela------------------------------------------------------------->
-
-        <section class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th id="vanechline">ID Histórico</th>
-                        <th>ID Ativo</th>
-                        <th>Data Evento</th>
-                        <th>Status Anterior</th>
-                        <th>Status Novo</th>
-                        <th>Localização Anterior</th>
-                        <th>Localização Nova</th>
-                        <th>Observação</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
-        </section>
     </section>
 
-
-
-
-    <!--Button------------------------------------------------------------->
+    <section>
+        <div class="container2">
+            <section class="table-container">
+                <table id="tabela_historico_ativo">
+                    <thead>
+                        <tr>
+                            <th id="vanechline"></th>
+                            <th>ID Histórico</th>
+                            <th>ID Ativo</th>
+                            <th>Data Evento</th>
+                            <th>Status Anterior</th>
+                            <th>Status Novo</th>
+                            <th>Localização Anterior</th>
+                            <th>Localização Nova</th>
+                            <th>Observação</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historicoTableBody">
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </section>
 
     <div class="container text-center mt-5" id="button_main">
-
         <div class="d-flex justify-content-center align-items-center mt-4">
-            <button class="arrow-btn" id="prevBtn" onclick="changePage(currentPage - 1)"><i
-                    class="fa-solid fa-arrow-left"></i></button>
-
-            <button class="btn" onclick="changePage(1)">
-                <hr class="page-line" id="line1">
+            <button class="arrow-btn" id="prevBtn">
+                <i class="fa-solid fa-arrow-left"></i>
             </button>
-            <button class="btn" onclick="changePage(2)">
-                <hr class="page-line" id="line2">
+            <div id="paginationLines"></div>
+            <button class="arrow-btn" id="nextBtn">
+                <i class="fa-solid fa-arrow-right"></i>
             </button>
-            <button class="btn" onclick="changePage(3)">
-                <hr class="page-line" id="line3">
-            </button>
-            <button class="btn" onclick="changePage(4)">
-                <hr class="page-line" id="line4">
-            </button>
-
-            <button class="arrow-btn" id="nextBtn" onclick="changePage(currentPage + 1)"><i
-                    class="fa-solid fa-arrow-right"></i></button>
         </div>
-
         <div class="mt-3">
-            <p id="content">Estoque de peças</p>
+            <p id="content">Página 1</p>
         </div>
     </div>
 
+
+    <form id="formCreateHistorico">
+        <div class="modal fade" id="modalCreate" tabindex="-1" aria-labelledby="modalCreateLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="modalCreateLabel">Registro de Histórico Ativo</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="mensagemErroInserir" class="alert alert-danger d-none" role="alert"></div>
+                        <div class="modal_main d-flex flex-wrap">
+                            <div class="number_one col-12 col-md-6 pe-md-2">
+                                <div class="mb-3">
+                                    <label for="id_Ativo" class="form-label">Ativo</label>
+                                    <select class="form-select" id="id_Ativo" name="id_Ativo" required>
+                                        <option value="" disabled selected>Selecione um ativo...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Data_Evento" class="form-label">Data Evento</label>
+                                    <input type="datetime-local" class="form-control" id="Data_Evento"
+                                        name="Data_Evento" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Status_Anterior" class="form-label">Status Anterior</label>
+                                    <select class="form-select" id="Status_Anterior" name="Status_Anterior">
+                                        <option value="ativo">Ativo</option>
+                                        <option value="inativo">Inativo</option>
+                                        <option value="em manutencao">Em Manutenção</option>
+                                        <option value="condenado">Condenado</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Status_Novo" class="form-label">Status Novo</label>
+                                    <select class="form-select" id="Status_Novo" name="Status_Novo" required>
+                                        <option value="ativo">Ativo</option>
+                                        <option value="inativo">Inativo</option>
+                                        <option value="em manutencao">Em Manutenção</option>
+                                        <option value="condenado">Condenado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="number_two col-12 col-md-6 ps-md-2">
+                                <div class="mb-3">
+                                    <label for="Localizacao_Anterior" class="form-label">Localização Anterior</label>
+                                    <input type="text" class="form-control" id="Localizacao_Anterior"
+                                        name="Localizacao_Anterior" placeholder="Digite a antiga localização">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Localizacao_Nova" class="form-label">Localização Atual</label>
+                                    <input type="text" class="form-control" id="Localizacao_Nova"
+                                        name="Localizacao_Nova" placeholder="Digite a nova localização">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Observacao" class="form-label">Observações</label>
+                                    <textarea class="form-control" id="Observacao" name="Observacao" rows="4"
+                                        placeholder="Digite as Observações"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" id="rodape_modelo">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <form id="formEditHistorico">
+        <div class="modal fade" id="modalEdit" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="modalEditLabel">Editar Histórico de Ativo</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="mensagemErroEditar" class="alert alert-danger d-none" role="alert"></div>
+                        <input type="hidden" id="id_Historico_update" name="id_Historico_update">
+
+                        <div class="modal_main d-flex flex-wrap">
+                            <div class="number_one col-12 col-md-6 pe-md-2">
+                                <div class="mb-3">
+                                    <label for="id_Ativo_update" class="form-label">Ativo</label>
+                                    <select class="form-select" id="id_Ativo_update" name="id_Ativo_update" required>
+                                        <option value="" disabled selected>Selecione um ativo...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Data_Evento_update" class="form-label">Data Evento</label>
+                                    <input type="datetime-local" class="form-control" id="Data_Evento_update"
+                                        name="Data_Evento_update" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Status_Anterior_update" class="form-label">Status Anterior</label>
+                                    <select class="form-select" id="Status_Anterior_update"
+                                        name="Status_Anterior_update">
+                                        <option value="ativo">Ativo</option>
+                                        <option value="inativo">Inativo</option>
+                                        <option value="em manutencao">Em Manutenção</option>
+                                        <option value="condenado">Condenado</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Status_Novo_update" class="form-label">Status Novo</label>
+                                    <select class="form-select" id="Status_Novo_update" name="Status_Novo_update"
+                                        required>
+                                        <option value="ativo">Ativo</option>
+                                        <option value="inativo">Inativo</option>
+                                        <option value="em manutencao">Em Manutenção</option>
+                                        <option value="condenado">Condenado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="number_two col-12 col-md-6 ps-md-2">
+                                <div class="mb-3">
+                                    <label for="Localizacao_Anterior_update" class="form-label">Localização
+                                        Anterior</label>
+                                    <input type="text" class="form-control" id="Localizacao_Anterior_update"
+                                        name="Localizacao_Anterior_update">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Localizacao_Nova_update" class="form-label">Localização Atual</label>
+                                    <input type="text" class="form-control" id="Localizacao_Nova_update"
+                                        name="Localizacao_Nova_update">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Observacao_update" class="form-label">Observações</label>
+                                    <textarea class="form-control" id="Observacao_update" name="Observacao_update"
+                                        rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o registro de histórico com ID: <strong
+                            id="deleteHistoricoId"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <script src="../JS/relatorioAtivo.js"></script>
 </body>
-<script src="../JS/relatorioAtivo.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
 
 </html>

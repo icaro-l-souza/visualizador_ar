@@ -1,4 +1,4 @@
-// home.js
+// home.js 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
 
 // --- VARIÁVEIS GLOBAIS ---
 let chartTemp, chartUmid;
@@ -130,22 +130,91 @@ async function carregarDadosSensores() {
 
 
 // --- FUNÇÕES DA INTELIGÊNCIA ARTIFICIAL (GEMINI) ---
-
 async function callGeminiAPI(prompt) {
-    const apiKey = "AIzaSyD7hGcyKNffmPHLUiNAgWDUzeAW0MwR93c";
+    const apiKey = "AIzaSyD7hGcyKNffmPHLUiNAgWDUzeAW0MwR93c"; // Sua chave Gemini
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
     const payload = { contents: [{ parts: [{ text: prompt }] }] };
     try {
         const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (!response.ok) {
             const errorData = await response.json();
-            const errorMessage = errorData.error?.message || 'A resposta da API indica um erro.';
-            return `<strong>Erro ao contatar a IA:</strong><br><br>${errorMessage}`;
+            // Lança um erro com a mensagem específica da API para ser capturado pelo seletor.
+            throw new Error(errorData.error?.message || 'Erro desconhecido na API Gemini.');
         }
         const result = await response.json();
-        return result.candidates?.[0]?.content?.parts?.[0]?.text || "A IA não retornou uma resposta válida.";
+        return result.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini não retornou uma resposta válida.";
     } catch (error) {
-        return "Falha na comunicação com a IA. Verifique sua conexão.";
+        // Repassa o erro para a função que chamou (callAIProvider)
+        throw error;
+    }
+}
+
+/**
+ * Adaptador 2: Comunica-se com a API da OpenAI (modelos GPT).
+ */
+async function callOpenAI_API(prompt) {
+    const apiKey = "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"; 
+    if (apiKey === "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") {
+        throw new Error("A chave de API da OpenAI não foi configurada.");
+    }
+    const apiUrl = `https://api.openai.com/v1/chat/completions`;
+    const payload = {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }]
+    };
+    try {
+        const response = await fetch(apiUrl, { 
+            method: 'POST', 
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            }, 
+            body: JSON.stringify(payload) 
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Erro desconhecido na API OpenAI.');
+        }
+        const result = await response.json();
+        return result.choices?.[0]?.message?.content || "OpenAI não retornou uma resposta válida.";
+    } catch (error) {
+        throw error;
+    }
+}
+
+/**
+ * ATUALIZADO Seletor: Função principal que escolhe qual IA usar, com lógica de fallback.
+ */
+async function callAIProvider(provider, prompt) {
+    if (provider === 'gemini') {
+        try {
+            console.log("Tentando provedor primário: Gemini...");
+            return await callGeminiAPI(prompt);
+        } catch (error) {
+            console.error(`Erro ao contatar a IA (Gemini):`, error);
+            // Verifica se o erro é de sobrecarga para tentar o fallback.
+            if (error.message && error.message.toLowerCase().includes('overloaded')) {
+                console.warn("Gemini sobrecarregado. Acionando fallback para OpenAI...");
+                try {
+                    return await callOpenAI_API(prompt);
+                } catch (openAIError) {
+                    console.error(`Erro ao contatar a IA (OpenAI Fallback):`, openAIError);
+                    return `<strong>Erro nos dois provedores de IA:</strong><br><br><b>Gemini:</b> ${error.message}<br><b>OpenAI:</b> ${openAIError.message}`;
+                }
+            }
+            // Se for outro erro do Gemini, mostra diretamente.
+            return `<strong>Erro ao contatar a IA:</strong><br><br>${error.message}`;
+        }
+    } else if (provider === 'openai') {
+        // Chamada direta para OpenAI, caso seja a preferência.
+        try {
+            return await callOpenAI_API(prompt);
+        } catch (error) {
+             console.error(`Erro ao contatar a IA (OpenAI):`, error);
+             return `<strong>Erro ao contatar a IA:</strong><br><br>${error.message}`;
+        }
+    } else {
+        return `<strong>Erro de Configuração:</strong><br><br>Provedor de IA '${provider}' não é suportado.`;
     }
 }
 
@@ -179,17 +248,18 @@ async function handleGeminiAnalysis(ativo) {
     document.getElementById('gemini-asset-name').textContent = ativo.nome;
     document.getElementById('gemini-asset-status').textContent = ativo.status;
 
-    // O prompt agora inclui o último erro conhecido, vindo do banco de dados.
     const prompt = `Aja como um especialista em manutenção industrial. O ativo '${ativo.nome}' (ID: ${ativo.id}) está com o status '${ativo.status}'. O último erro registrado foi: "${ativo.ultimo_erro}". Forneça uma análise concisa em tópicos sobre:
     **1. Possíveis Causas Raiz:** Baseado no erro, liste 3 possíveis motivos para este status.
     **2. Ações Recomendadas:** Sugira 3 passos de diagnóstico imediatos para a equipe.
     Responda em português do Brasil e use este formato exato.`;
-
-    const result = await callGeminiAPI(prompt);
+    
+    // Nenhuma mudança aqui. A lógica de fallback é gerenciada pelo callAIProvider.
+    const result = await callAIProvider('gemini', prompt);
     
     responseEl.style.textAlign = 'left';
     responseEl.innerHTML = formatAIResponse(result);
 }
+
 
 
 // --- INICIALIZAÇÃO DA PÁGINA ---
@@ -208,4 +278,207 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarDadosSensores();
     setInterval(atualizarIndicadores, 15000);
     setInterval(carregarDadosSensores, 10000);
+});
+
+
+/* chatbot-button.js
+   Módulo autônomo. Usa IIFE para não poluir o escopo global.
+   Regras:
+   - Não altera variáveis globais.
+   - Event listeners anexados ao root apenas.
+   - Fornece hooks (callbacks) para integração com chat backend.
+*/
+(function(){
+  const ROOT_ID = 'sgmi-chatbot-root';
+  const BTN_ID = 'sgmi-chatbot-btn';
+  const MODAL_ID = 'sgmi-chatbot-modal';
+  const CLOSE_SEL = '.sgmi-chatbot-close';
+
+  const root = document.getElementById(ROOT_ID);
+  if (!root) {
+    console.warn('[sgmi-chatbot] root element not found. Skipping initialization.');
+    return;
+  }
+
+  const btn = document.getElementById(BTN_ID);
+  const modal = document.getElementById(MODAL_ID);
+  const closeBtn = modal ? modal.querySelector(CLOSE_SEL) : null;
+
+  // Estado encapsulado
+  let state = { open: false };
+
+  // Accessibility: allow open/close with keyboard
+  function onKeyDown(e){
+    if (!state.open && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      toggleModal(true);
+    } else if (state.open && e.key === 'Escape') {
+      toggleModal(false);
+    }
+  }
+
+  function toggleModal(open){
+    state.open = !!open;
+    if (modal) modal.setAttribute('aria-hidden', (!state.open).toString());
+    if (btn) {
+      btn.setAttribute('aria-pressed', state.open ? 'true' : 'false');
+      if (state.open) btn.classList.remove('sgmi-idle'); else btn.classList.add('sgmi-idle');
+    }
+    // focus management
+    if (state.open){
+      // focus the modal for keyboard users
+      const focusable = modal && modal.querySelector('button, [href], input, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable) focusable.focus();
+    } else {
+      if (btn) btn.focus();
+    }
+  }
+
+  // Click handlers
+  function onBtnClick(e){
+    e.stopPropagation && e.stopPropagation();
+    toggleModal(!state.open);
+  }
+
+  function onOutsideClick(e){
+    // close modal when clicking outside (but be careful with nested components)
+    if (!state.open || !modal) return;
+    const within = modal.contains(e.target) || btn.contains(e.target);
+    if (!within) toggleModal(false);
+  }
+
+  // Attach handlers safely
+  btn && btn.addEventListener('click', onBtnClick);
+  btn && btn.addEventListener('keydown', onKeyDown);
+  closeBtn && closeBtn.addEventListener('click', ()=> toggleModal(false));
+  document.addEventListener('click', onOutsideClick);
+
+  // Initialize idle breathing animation
+  // start as idle
+  if (btn) btn.classList.add('sgmi-idle');
+
+  // Expose a safe hook for integration (no global leak)
+  // window.SGMI_CHATBOT is used only if developer explicitly sets it (not created here)
+  // To integrate chat behavior, assign handlers to window.SGMI_CHATBOT in your own code:
+  // window.SGMI_CHATBOT = { onOpen: fn(), onClose: fn(), onSendMessage: async fn(message) => response }
+  try {
+    if (window.SGMI_CHATBOT && typeof window.SGMI_CHATBOT.onOpen === 'function') {
+      // call onOpen when modal is opened
+      const originalToggle = toggleModal;
+      toggleModal = function(open){
+        originalToggle(open);
+        if (open) window.SGMI_CHATBOT.onOpen();
+        else if (typeof window.SGMI_CHATBOT.onClose === 'function') window.SGMI_CHATBOT.onClose();
+      };
+    }
+  } catch (err) {
+    // fail silently
+    console.warn('[sgmi-chatbot] hook init error', err);
+  }
+
+  // Clean-up API (returns a function to remove listeners) — useful if SPA changes route
+  function uninstall(){
+    btn && btn.removeEventListener('click', onBtnClick);
+    btn && btn.removeEventListener('keydown', onKeyDown);
+    closeBtn && closeBtn.removeEventListener('click', ()=> toggleModal(false));
+    document.removeEventListener('click', onOutsideClick);
+  }
+
+  // Attach to root dataset for external control if needed
+  root.sgmiChatbot = { toggleModal, uninstall };
+
+  // safety: prevent accidental autosubmit in forms when pressing Enter on the button
+  btn && btn.addEventListener('keypress', (e)=> {
+    if (e.key === 'Enter') e.preventDefault();
+  });
+
+})();
+
+
+// --- INICIALIZAÇÃO DA PÁGINA ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Inicializa o modal de análise de ativos
+    const geminiModalElement = document.getElementById('geminiAnalysisModal');
+    if (geminiModalElement) {
+        geminiModal = new bootstrap.Modal(geminiModalElement);
+    }
+
+    // --- LÓGICA DO CHATBOT ---
+    const chatbotFab = document.getElementById('ai-chatbot-fab');
+    const chatWindow = document.getElementById('ai-chat-window');
+    const closeChatBtn = document.getElementById('ai-chat-close-btn');
+    const chatMessages = document.getElementById('ai-chat-messages');
+    const chatInput = document.getElementById('ai-chat-input');
+    const sendBtn = document.getElementById('ai-chat-send-btn');
+
+    if (chatbotFab && chatWindow && closeChatBtn && chatInput && sendBtn) {
+        // Abre e fecha a janela do chat
+        chatbotFab.addEventListener('click', () => {
+            chatWindow.classList.toggle('visible');
+            chatInput.focus();
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatWindow.classList.remove('visible');
+        });
+
+        // Função para criar e adicionar mensagens ao chat
+        const adicionarMensagem = (conteudo, tipo = "ai") => {
+            const div = document.createElement('div');
+            div.classList.add('message');
+            div.classList.add(tipo === "user" ? 'user-message' : 'ai-message');
+            div.innerHTML = `<p>${conteudo}</p>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        // Função para enviar pergunta ao endpoint
+        const enviarPergunta = async () => {
+            const pergunta = chatInput.value.trim();
+            if (!pergunta) return;
+
+            // Adiciona a pergunta do usuário ao chat
+            adicionarMensagem(pergunta, "user");
+            chatInput.value = '';
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/chat', { // URL absoluta do endpoint Flask
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: pergunta })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro na requisição: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const resposta = data.mensagem || "Não obtive resposta do servidor.";
+
+                // Adiciona a resposta da IA ao chat
+                adicionarMensagem(resposta, "ai");
+            } catch (err) {
+                adicionarMensagem("Ocorreu um erro ao enviar a pergunta.", "ai");
+                console.error(err);
+            } finally {
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        };
+
+        // Envia pergunta ao clicar no botão
+        sendBtn.addEventListener('click', enviarPergunta);
+
+        // Envia pergunta ao pressionar Enter
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                enviarPergunta();
+            }
+        });
+    }
+    // --- FIM DA LÓGICA DO CHATBOT ---
 });

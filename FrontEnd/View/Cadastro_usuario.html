@@ -10,144 +10,116 @@
         integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="../css/cadastro.css">
-    <script src="../JS/Cadastro_usuario.js"></script>
     <title>Cadastro</title>
 </head>
 
 <body>
-    <div id="mensagemErroInserir" class="alert alert-danger d-none" role="alert"></div>
     <section>
         <div class="icons">
             <a href="../View/home.html">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-
         </div>
 
-
         <div id="pos">
-
             <div class="form">
                 <form action="" id="userForm">
                     <h2 class="titulo">Cadastro de Usuário</h2>
+
+                    <div id="mensagem" class="alert d-none mx-3" role="alert"></div>
+                    
                     <div class="modal_main" id="principal_modelo_cadastro">
                         <div class="number_one">
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputName" class="form-label" id="nome">Nome</label>
-                                <input type="text" class="form-control" id="inputName" placeholder="Digite o nome">
+                                <input type="text" class="form-control" name="Nome" id="inputName" placeholder="Digite o nome">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputCPF" class="form-label" id="CPF">CPF</label>
-                                <input type="text" class="form-control" id="inputCPF" placeholder="Digite o seu CPF">
+                                <input type="text" class="form-control" name="CPF" id="inputCPF" placeholder="Digite o seu CPF">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputPhone" class="form-label" id="celular">Telefone</label>
-                                <input type="text" class="form-control" id="inputPhone"
-                                    placeholder="Digite o seu telefone">
+                                <input type="text" class="form-control" name="Telefone" id="inputPhone" placeholder="Digite o seu telefone">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputDate" class="form-label" id="nascimento">Data de Nascimento</label>
-                                <input type="date" class="form-control" id="inputDate">
+                                <input type="date" class="form-control" name="Data_Nascimento" id="inputDate">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputSexo" class="form-label" id="sexo">Sexo</label>
-                                <select class="form-select" id="inputSexo">
+                                <select class="form-select" name="Sexo" id="inputSexo">
                                     <option value="Masculino" selected>Masculino</option>
                                     <option value="Feminino">Feminino</option>
                                 </select>
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputCargo" class="form-label" id="cargo">Cargo</label>
-                                <input type="text" class="form-control" id="inputCargo" placeholder="Digite o Cargo">
+                                <input type="text" class="form-control" name="Cargo" id="inputCargo" placeholder="Digite o Cargo">
                             </div>
-
                         </div>
 
                         <div class="number_two_cadastro">
-
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                             <div class="col-12 mb-3 modal-body">
                                 <label for="inputDepartamento" class="form-label" id="departamento">Departamento</label>
-                                <input type="text" class="form-control" id="inputDepartamento"
-                                    placeholder="Digite o Departamento">
+                                <input type="text" class="form-control" name="Departamento" id="inputDepartamento" placeholder="Digite o Departamento">
                             </div>
-
-
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
-                                <label for="inputAddress" class="form-label" id="endereco">Endereço</label>
-                                <input type="text" class="form-control" id="inputCEP" placeholder="Digite o CEP">
-                                <input type="text" class="form-control" id="inputCidade" placeholder="Cidade" readonly>
-                                <input type="text" class="form-control" id="inputBairro" placeholder="Bairro" readonly>
-                                <input type="text" class="form-control" id="inputRua" placeholder="Rua" readonly>
-                                <input type="text" class="form-control" id="inputNumero" placeholder="Numero">
-                                <input type="text" class="form-control" id="inputComplemento" placeholder="Complemento">
+                            <div class="col-12 mb-3 modal-body">
+                                <label class="form-label" id="endereco">Endereço</label>
+                                <input type="text" class="form-control mb-1" name="CEP" id="inputCEP" placeholder="Digite o CEP">
+                                <input type="text" class="form-control mb-1" name="Cidade" id="inputCidade" placeholder="Cidade" readonly>
+                                <input type="text" class="form-control mb-1" name="Bairro" id="inputBairro" placeholder="Bairro" readonly>
+                                <input type="text" class="form-control mb-1" name="Rua" id="inputRua" placeholder="Rua" readonly>
+                                <input type="text" class="form-control mb-1" name="Numero" id="inputNumero" placeholder="Numero">
+                                <input type="text" class="form-control" name="Complemento" id="inputComplemento" placeholder="Complemento">
                             </div>
-
-
-                            <!-- Perfil -->
-                            <label for="foto_usuario" class="form-label">Foto</label>
-                            <input type="file" class="form-control" id="foto_usuario" accept="image/*">
-
-
-
+                            <div class="col-12 mb-3 modal-body">
+                                <label for="foto_usuario" class="form-label">Foto</label>
+                                <input type="file" class="form-control" name="Foto_Usuario" id="foto_usuario" accept="image/*">
+                                <img id="foto_preview" src="#" alt="Preview da Foto" class="img-thumbnail mt-2 d-none" style="max-width: 150px;">
+                            </div>
                         </div>
 
                         <div class="number_three">
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputEmail" class="form-label" id="email_cadastro">E-mail</label>
-                                <input type="email" class="form-control" id="inputEmail"
-                                    placeholder="Digite o seu e-mail">
+                                <input type="email" class="form-control" name="Email" id="inputEmail" placeholder="Digite o seu e-mail">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputSenha" class="form-label" id="senha_cadastro">Senha</label>
                                 <div id="senhadiv">
-                                    <input type="password" class="form-control" id="inputSenha"
-                                        placeholder="Digite sua Senha">
+                                    <input type="password" class="form-control" name="Senha" id="inputSenha" placeholder="Digite sua Senha">
                                     <i class="fa-solid fa-eye" id="btn-senha" onclick="mostrarSenha()"></i>
                                 </div>
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputUsername" class="form-label" id="username">Username</label>
-                                <input type="text" class="form-control" id="inputUsername"
-                                    placeholder="Digite o Username">
+                                <input type="text" class="form-control" name="Login" id="inputUsername" placeholder="Digite o Username">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputAdmissao" class="form-label" id="admissao">Data de Admissão</label>
-                                <input type="date" class="form-control" id="inputAdmissao">
+                                <input type="date" class="form-control" name="Data_Admissao" id="inputAdmissao">
                             </div>
-
-                            <div class="col-12 mb-3 modal-body" id="Corpo_modelo_cadastro">
+                            <div class="col-12 mb-3 modal-body">
                                 <label for="inputtipo" class="form-label" id="tipo_usuario">Tipo Usuário</label>
-                                <select class="form-select" id="inputtipo">
+                                <select class="form-select" name="Tipo_Usuario" id="inputtipo">
                                     <option value="Usuario">Usuário</option>
                                     <option value="Administrador">Administrador</option>
                                     <option value="Gestor">Gestor</option>
                                 </select>
                             </div>
-
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" id="save_cadastro">Save changes</button>
+                        <button type="submit" class="btn btn-primary" id="save_cadastro">Salvar</button>
                     </div>
                 </form>
-
             </div>
-
         </div>
         <div id="img_left"></div>
     </section>
 
-
+    <script src="../JS/Cadastro_usuario.js"></script>
 </body>
 
 </html>

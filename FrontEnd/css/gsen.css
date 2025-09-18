@@ -470,3 +470,11 @@ td {
   border-color: #ddd;
 }
 
+#particles-js {
+  position: fixed; /* Fixa na tela, não rola com o conteúdo */
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1; /* Essencial: coloca o canvas atrás de todo o resto */
+}

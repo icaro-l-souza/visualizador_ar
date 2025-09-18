@@ -1,41 +1,39 @@
 // =================== VARIÁVEIS GLOBAIS DE ESTADO ===================
-let allOrdens = [];         // Guarda TODAS as ordens carregadas da API (cache)
-let filteredOrdens = [];    // Guarda as ordens após aplicar os filtros
-let ordemParaDeletarId = null; // Guarda o ID para o modal de exclusão
-let ordemAtualID = null;    // Guarda o ID da ordem para os modais de vincular
+let allOrdens = [];
+let filteredOrdens = [];
+let ordemParaDeletarId = null;
+let ordemAtualID = null;
 let currentPage = 1;
 const rowsPerPage = 10;
 
 // =================== FUNÇÕES GLOBAIS (ACESSÍVEIS PELO HTML) ===================
 
-
-
 function formatarDataParaBR(dataString) {
     if (!dataString) return '';
-    return new Date(dataString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 }
 
-/**
- * Exporta os dados da tabela para Excel ou PDF.
- */
+function formatarDataParaInput(dataString) {
+    if (!dataString) return '';
+    const data = new Date(dataString);
+    data.setMinutes(data.getMinutes() + data.getTimezoneOffset());
+    return data.toISOString().split('T')[0];
+}
+
 window.exportar = function (formato, escopo) {
-    const dadosParaExportar = escopo === 'tudo'
-        ? filteredOrdens
-        : filteredOrdens.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const dadosDaPagina = filteredOrdens.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const dadosParaExportar = escopo === 'tudo' ? allOrdens : dadosDaPagina;
 
     if (dadosParaExportar.length === 0) {
-        alert("Nenhum dado para exportar.");
+        exibirMensagemGeral("Nenhum dado para exportar.", "warning");
         return;
     }
 
     const colunas = ["ID Ordem", "ID Ativo", "Descrição", "Data Abertura", "Status", "Prioridade", "ID Solicitação"];
     const linhas = dadosParaExportar.map(ordem => [
-        ordem.id_Ordem,
-        ordem.id_Ativo,
-        ordem.Descricao_Problema,
-        formatarDataParaBR(ordem.Data_Abertura),
-        ordem.Status,
-        ordem.Prioridade,
+        ordem.id_Ordem, ordem.id_Ativo, ordem.Descricao_Problema,
+        formatarDataParaBR(ordem.Data_Abertura), ordem.Status, ordem.Prioridade,
         ordem.id_Solicitacao || 'N/A'
     ]);
 
@@ -48,9 +46,7 @@ window.exportar = function (formato, escopo) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
         doc.autoTable({
-            head: [colunas],
-            body: linhas,
-            styles: { fontSize: 7 },
+            head: [colunas], body: linhas, styles: { fontSize: 7 },
             headStyles: { fillColor: [52, 58, 64] }
         });
         doc.save(`ordens_${escopo}.pdf`);
@@ -63,8 +59,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- FUNÇÕES DE CARREGAMENTO E API ---
 
     async function carregarOrdens() {
-        const mensagemDiv = document.getElementById('mensagemErro');
-        mensagemDiv.classList.add('d-none');
+        const tbody = document.getElementById('ordem_manutencaoTableBody');
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center">Carregando...</td></tr>`;
         try {
             const response = await fetch('http://localhost:5000/ordens');
             if (!response.ok) throw new Error('Erro ao buscar ordens de manutenção.');
@@ -72,8 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
             aplicarFiltrosERenderizar();
         } catch (error) {
             console.error("Erro ao carregar ordens:", error);
-            mensagemDiv.textContent = error.message;
-            mensagemDiv.classList.remove('d-none');
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger">${error.message}</td></tr>`;
         }
     }
 
@@ -90,11 +85,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const prioridadeOk = !prioridade || ordem.Prioridade === prioridade;
             let dataOk = true;
             if (dataInicio) {
-                dataOk = dataOk && (new Date(ordem.Data_Abertura) >= new Date(dataInicio));
+                dataOk = dataOk && (ordem.Data_Abertura.split('T')[0] >= dataInicio);
             }
             if (dataFim) {
-                // Adiciona T23:59:59 para incluir o dia inteiro na busca
-                dataOk = dataOk && (new Date(ordem.Data_Abertura) <= new Date(dataFim + 'T23:59:59'));
+                dataOk = dataOk && (ordem.Data_Abertura.split('T')[0] <= dataFim);
             }
             return statusOk && prioridadeOk && dataOk;
         });
@@ -172,7 +166,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- LÓGICA DE MODAIS E AÇÕES ---
 
-    // ADICIONAR
+    function exibirMensagemGeral(mensagem, tipo = 'danger', elementoId = 'mensagemErro') {
+        const mensagemDiv = document.getElementById(elementoId);
+        if (mensagemDiv) {
+            mensagemDiv.textContent = mensagem;
+            mensagemDiv.className = `alert alert-${tipo}`;
+            mensagemDiv.classList.remove('d-none');
+            setTimeout(() => {
+                mensagemDiv.classList.add('d-none');
+            }, 4000);
+        } else {
+            alert(mensagem);
+        }
+    }
+
     document.getElementById('ordem_servicoForm').addEventListener('submit', async function (event) {
         event.preventDefault();
         const Id_Ativo = document.getElementById('ativo_input').value;
@@ -180,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const Prioridade = document.getElementById('Prioridade').value;
         const solicitacao = document.getElementById('solicitacaoSelect').value || null;
         if (!Id_Ativo || !Descricao || !Prioridade) {
-            alert("Preencha todos os campos obrigatórios.");
+            exibirMensagemGeral("Preencha todos os campos obrigatórios.", "warning", "mensagemErroInserir");
             return;
         }
         const dados = {
@@ -196,17 +203,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             const data = await response.json();
             if (!response.ok || !data.inserted_id) throw new Error(data.mensagem);
-            alert('Ordem de serviço cadastrada com sucesso!');
+            exibirMensagemGeral('Ordem de serviço cadastrada com sucesso!', 'success', 'mensagemSucesso');
             await carregarOrdens();
             bootstrap.Modal.getInstance(document.getElementById('exampleModal')).hide();
             this.reset();
         } catch (error) {
-            document.getElementById('mensagemErroInserir').textContent = 'Erro: ' + error.message;
-            document.getElementById('mensagemErroInserir').classList.remove('d-none');
+            exibirMensagemGeral('Erro: ' + error.message, 'danger', 'mensagemErroInserir');
         }
     });
 
-    // EDITAR
     window.abrirModalEditarOrdem = async function (button) {
         const row = button.closest('tr');
         const id_Ordem = row.cells[1].innerText;
@@ -217,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('Data_Abertura_update').value = formatarDataParaInput(ordem.Data_Abertura);
         document.getElementById('Status_update').value = ordem.Status;
         document.getElementById('Prioridade_update').value = ordem.Prioridade;
-        carregarSolicitacoes(document.getElementById('solicitacaoSelectEditar'), ordem.id_Solicitacao);
+        await carregarSolicitacoes(document.getElementById('solicitacaoSelectEditar'), ordem.id_Solicitacao);
         await buscarAtivoPorSolicitacao(document.getElementById('solicitacaoSelectEditar'), document.getElementById('ativo_input_update'));
 
         const dataFechamentoContainer = document.querySelector('[data-fechamento]');
@@ -236,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const json = {
             id_Ativo: document.getElementById('ativo_input_update').value,
             id_Solicitacao: document.getElementById('solicitacaoSelectEditar').value || null,
-            Data_Abertura: document.getElementById('Data_Abertura_update').value || new Date().toISOString().split('T')[0],
+            Data_Abertura: document.getElementById('Data_Abertura_update').value,
             Descricao_Problema: document.getElementById('Descricao_update').value,
             Status: document.getElementById('Status_update').value,
             Prioridade: document.getElementById('Prioridade_update').value,
@@ -250,16 +255,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             const data = await response.json();
             if (!response.ok || !data.affected_rows) throw new Error(data.mensagem);
-            alert('Ordem atualizada com sucesso!');
+            exibirMensagemGeral('Ordem atualizada com sucesso!', 'success', 'mensagemSucessoEditar');
             await carregarOrdens();
-            bootstrap.Modal.getInstance(document.getElementById('exampleModalUpdate')).hide();
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('exampleModalUpdate')).hide();
+            }, 1500);
         } catch (error) {
-            document.getElementById('mensagemErroEditar').textContent = 'Erro: ' + error.message;
-            document.getElementById('mensagemErroEditar').classList.remove('d-none');
+            exibirMensagemGeral('Erro: ' + error.message, 'danger', 'mensagemErroEditar');
         }
     });
 
-    // DELETAR
     window.abrirModalDeletar = function (id) {
         ordemParaDeletarId = id;
         document.getElementById('ordemIdParaDeletar').textContent = id;
@@ -274,17 +279,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch(`http://localhost:5000/delete_ordens/${ordemParaDeletarId}`, { method: 'DELETE' });
             const data = await response.json();
             if (!response.ok || !data.affected_rows) throw new Error(data.mensagem);
-            alert("Ordem excluída com sucesso!");
+            exibirMensagemGeral("Ordem excluída com sucesso!", "success");
             await carregarOrdens();
         } catch (error) {
-            alert("Erro ao excluir ordem: " + error.message);
+            exibirMensagemGeral("Erro ao excluir ordem: " + error.message, "danger");
         } finally {
             modal.hide();
             ordemParaDeletarId = null;
         }
     }
 
-    // VINCULAR FUNCIONÁRIOS E PEÇAS (Seu código original, mantido e organizado)
+    // --- VINCULAR FUNCIONÁRIOS ---
     window.mostrarFunc = async function (idOrdem) {
         ordemAtualID = idOrdem;
         try {
@@ -302,8 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
             await preencherFuncionariosParaVincular();
             let funcModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('funcModal'));
             funcModal.show();
-
-        } catch (error) { alert('Erro ao carregar dados do funcionário.'); }
+        } catch (error) { exibirMensagemGeral('Erro ao carregar dados do funcionário.', 'danger'); }
     };
 
     async function preencherFuncionariosParaVincular() {
@@ -324,38 +328,196 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
                 tbody.appendChild(tr);
             });
-        } catch (error) { alert('Erro ao carregar funcionários para vincular.'); }
+        } catch (error) { exibirMensagemGeral('Erro ao carregar funcionários para vincular.', 'danger'); }
     }
 
     document.getElementById('vincularFunc').addEventListener('click', async () => {
         const idFuncionario = document.getElementById('funcSelecionadoID').value;
-        if (!idFuncionario || !ordemAtualID) return alert('Selecione um funcionário.');
+        if (!idFuncionario || !ordemAtualID) return exibirMensagemGeral('Selecione um funcionário.', 'warning');
         try {
             const response = await fetch(`http://localhost:5000/ordens/${ordemAtualID}/funcionarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_Funcionario: parseInt(idFuncionario) }) });
             if (!response.ok) throw new Error('Erro na API');
-            alert('Funcionário vinculado com sucesso!');
+            exibirMensagemGeral('Funcionário vinculado com sucesso!', 'success');
             await mostrarFunc(ordemAtualID);
-        } catch (error) { alert('Erro ao vincular funcionário.'); }
+        } catch (error) { exibirMensagemGeral('Erro ao vincular funcionário.', 'danger'); }
     });
 
     window.desvincularFuncionario = async (idFuncionario, idOrdem) => {
-        if (!confirm("Deseja realmente desvincular este funcionário?")) return;
+        // Usando a nossa função de mensagem em vez do confirm
+        if (!await exibirConfirmacao("Deseja realmente desvincular este funcionário?")) return;
         try {
             const response = await fetch(`http://localhost:5000/ordens/${idOrdem}/funcionarios/${idFuncionario}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Erro na API');
-            alert('Funcionário desvinculado com sucesso!');
+            exibirMensagemGeral('Funcionário desvinculado com sucesso!', 'success');
             await mostrarFunc(idOrdem);
-        } catch (error) { alert('Erro ao desvincular funcionário.'); }
+        } catch (error) { exibirMensagemGeral('Erro ao desvincular funcionário.', 'danger'); }
     };
+
+    // =========================================================================
+    // CORREÇÃO E MELHORIA NA LÓGICA DE VINCULAR PEÇAS
+    // =========================================================================
+
+    // Vamos declarar a variável aqui para que ela seja acessível por outras funções
+    let pecasVinculadasNaOrdem = [];
 
     window.mostrarPeca = async function (idOrdem) {
         ordemAtualID = idOrdem;
-        // ... (Sua lógica para mostrar peças continua aqui)
-        new bootstrap.Modal(document.getElementById('PecaModal')).show();
+        try {
+            const response = await fetch(`http://localhost:5000/ordens/${idOrdem}/pecas`);
+            pecasVinculadasNaOrdem = await response.json(); // Armazena na variável global
+
+            const tbody = document.getElementById('pecaInfoTableBody');
+            tbody.innerHTML = '';
+
+            if (pecasVinculadasNaOrdem.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Nenhuma peça vinculada.</td></tr>';
+            } else {
+                pecasVinculadasNaOrdem.forEach(peca => {
+                    tbody.innerHTML += `<tr>
+                    <td>${peca.id_Peca || 'N/A'}</td>
+                    <td>${peca.Nome_Peca || 'N/A'}</td>
+                    <td>${peca.Quantidade || 'N/A'}</td>
+                    <td>${peca.Estoque !== null ? peca.Estoque : 'N/A'}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="desvincularPeca(${peca.id_Ordens_Peca}, ${idOrdem})">Desvincular</button></td>
+                </tr>`;
+                });
+            }
+            await preencherPecasParaVincular();
+
+            let pecaModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('PecaModal'));
+            pecaModal.show();
+        } catch (error) {
+            exibirMensagemGeral('Erro ao carregar dados da peça: ' + error.message, 'danger');
+        }
+    };
+
+    async function preencherPecasParaVincular() {
+        try {
+            // Busca todas as peças e as já vinculadas para não mostrá-las na lista de seleção
+            const [todasResponse, vinculadasResponse] = await Promise.all([
+                fetch('http://localhost:5000/pecas'),
+                fetch(`http://localhost:5000/ordens/${ordemAtualID}/pecas`)
+            ]);
+            const todasPecas = await todasResponse.json();
+            const pecasVinculadas = await vinculadasResponse.json();
+            const idsVinculadas = new Set(pecasVinculadas.map(p => p.id_Peca));
+            const tbody = document.getElementById('tabelaPecas');
+            tbody.innerHTML = '';
+
+            const pecasDisponiveis = todasPecas.filter(p => p.Estoque > 0);
+
+            pecasDisponiveis.forEach(peca => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${peca.id_Peca}</td><td>${peca.Nome_Peca}</td><td>${peca.Estoque}</td>`;
+                tr.style.cursor = 'pointer';
+                tr.onclick = () => {
+                    // Remove a classe 'table-primary' de qualquer outra linha selecionada
+                    tbody.querySelectorAll('tr').forEach(row => row.classList.remove('table-primary'));
+                    // Adiciona a classe na linha clicada
+                    tr.classList.add('table-primary');
+
+                    document.getElementById('pecaSelecionadaTexto').textContent = `${peca.id_Peca} - ${peca.Nome_Peca}`;
+                    document.getElementById('pecaSelecionadaID').value = peca.id_Peca;
+                    document.getElementById('pecaSelecionadaEstoque').value = peca.Estoque;
+                    // Ajusta o 'max' do input de quantidade para o estoque disponível
+                    document.getElementById('quantidadePeca').max = peca.Estoque;
+                };
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            exibirMensagemGeral('Erro ao carregar peças para vincular.', 'danger');
+        }
+    }
+
+    document.getElementById('vincularPeca').addEventListener('click', async () => {
+        const idPeca = document.getElementById('pecaSelecionadaID').value;
+        const quantidade = parseInt(document.getElementById('quantidadePeca').value, 10);
+        const estoqueDisponivel = parseInt(document.getElementById('pecaSelecionadaEstoque').value, 10);
+
+        if (!idPeca) return exibirMensagemGeral('Selecione uma peça.', 'warning');
+        if (isNaN(quantidade) || quantidade <= 0) return exibirMensagemGeral('A quantidade deve ser maior que zero.', 'warning');
+        if (quantidade > estoqueDisponivel) return exibirMensagemGeral(`Quantidade excede o estoque disponível (${estoqueDisponivel}).`, 'warning');
+
+        // VERIFICA SE A PEÇA JÁ ESTÁ VINCULADA
+        const vinculoExistente = pecasVinculadasNaOrdem.find(p => p.id_Peca == idPeca);
+
+        if (vinculoExistente) {
+            // --- SE JÁ EXISTE: ATUALIZA (PUT) ---
+            try {
+                const payload = { Quantidade: quantidade }; // Envia somente a quantidade a ser adicionada
+                const idDoVinculo = vinculoExistente.id_Ordens_Peca;
+
+                const response = await fetch(`http://localhost:5000/ordens/${ordemAtualID}/pecas/${idDoVinculo}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.mensagem || 'Erro na API ao atualizar quantidade.');
+                }
+                exibirMensagemGeral('Quantidade da peça atualizada com sucesso!', 'success');
+
+            } catch (error) {
+                exibirMensagemGeral('Erro ao atualizar quantidade: ' + error.message, 'danger');
+            }
+
+        } else {
+            // --- SE NÃO EXISTE: CRIA (POST) ---
+            try {
+                const payload = {
+                    id_Ordem: ordemAtualID,
+                    id_Peca: parseInt(idPeca),
+                    Quantidade: quantidade
+                };
+                const response = await fetch(`http://localhost:5000/ordens/${ordemAtualID}/pecas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.mensagem || 'Erro na API ao vincular peça.');
+                }
+                exibirMensagemGeral('Peça vinculada com sucesso!', 'success');
+
+            } catch (error) {
+                exibirMensagemGeral('Erro ao vincular peça: ' + error.message, 'danger');
+            }
+        }
+
+        // Após qualquer uma das operações, atualiza o modal e limpa a seleção
+        await mostrarPeca(ordemAtualID);
+        document.getElementById('pecaSelecionadaTexto').textContent = "Nenhum";
+        document.getElementById('pecaSelecionadaID').value = '';
+        document.getElementById('pecaSelecionadaEstoque').value = '0';
+        document.getElementById('quantidadePeca').value = '1';
+    });
+
+
+    window.desvincularPeca = async (idOrdemPeca, idOrdem) => {
+        if (!await exibirConfirmacao("Deseja realmente desvincular esta peça?")) return;
+        try {
+            const response = await fetch(`http://localhost:5000/ordens/${idOrdem}/pecas/${idOrdemPeca}`, { method: 'DELETE' });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.mensagem || 'Erro na API ao desvincular peça.');
+            }
+            exibirMensagemGeral('Peça desvinculada com sucesso!', 'success');
+            await mostrarPeca(idOrdem);
+        } catch (error) {
+            exibirMensagemGeral('Erro ao desvincular peça: ' + error.message, 'danger');
+        }
     };
 
     // --- EVENT LISTENERS ---
-    document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltrosERenderizar);
+
+    document.getElementById('filtroStatus').addEventListener('change', aplicarFiltrosERenderizar);
+    document.getElementById('filtroPrioridade').addEventListener('change', aplicarFiltrosERenderizar);
+    document.getElementById('filtroDataInicio').addEventListener('change', aplicarFiltrosERenderizar);
+    document.getElementById('filtroDataFim').addEventListener('change', aplicarFiltrosERenderizar);
+
     document.getElementById('limparFiltros').addEventListener('click', () => {
         document.getElementById('filtroStatus').value = '';
         document.getElementById('filtroPrioridade').value = '';
@@ -363,22 +525,17 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('filtroDataFim').value = '';
         aplicarFiltrosERenderizar();
     });
+
     document.getElementById('prevBtn').addEventListener('click', () => changePage(currentPage - 1));
     document.getElementById('nextBtn').addEventListener('click', () => changePage(currentPage + 1));
     document.getElementById('confirmDeleteBtn').addEventListener('click', deletarOrdemConfirmado);
 
-    // --- FUNÇÕES UTILITÁRIAS ---
     async function carregarSolicitacoes(selectElement, idSelecionado = null) {
         try {
             const response = await fetch('http://localhost:5000/solicitacoes');
             const solicitacoes = await response.json();
-
-            // LINHA ADICIONADA: Filtra a lista ANTES de criar as opções
             const solicitacoesValidas = solicitacoes.filter(s => s.Status !== 'Recusada');
-
             selectElement.innerHTML = '<option value="">Sem solicitação vinculada</option>';
-
-            // Agora o loop usa a lista já filtrada
             solicitacoesValidas.forEach(s => {
                 const option = document.createElement('option');
                 option.value = s.id_Solicitacao;
@@ -404,18 +561,30 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) { inputAtivo.value = ''; }
     }
 
+    // Função para substituir o 'confirm()' padrão por um modal do Bootstrap (opcional, mas recomendado)
+    function exibirConfirmacao(mensagem) {
+        return new Promise((resolve) => {
+            // Se você tiver um modal de confirmação genérico, pode usá-lo aqui.
+            // Por enquanto, vamos manter o confirm() para não adicionar HTML.
+            const confirmado = confirm(mensagem);
+            resolve(confirmado);
+        });
+    }
+
     document.getElementById('solicitacaoSelect').addEventListener('change', () => buscarAtivoPorSolicitacao(document.getElementById('solicitacaoSelect'), document.getElementById('ativo_input')));
     document.getElementById('solicitacaoSelectEditar').addEventListener('change', () => buscarAtivoPorSolicitacao(document.getElementById('solicitacaoSelectEditar'), document.getElementById('ativo_input_update')));
     document.getElementById('Status_update').addEventListener('change', function () { document.querySelector('[data-fechamento]').style.display = this.value === 'Concluida' ? 'block' : 'none'; });
 
-
-    function formatarDataParaInput(dataString) {
-        if (!dataString) return '';
-        return new Date(dataString).toISOString().split('T')[0];
-    }
-
     // --- INICIALIZAÇÃO ---
     carregarOrdens();
     carregarSolicitacoes(document.getElementById('solicitacaoSelect'));
+});
 
+// Bloco do Particles.js mantido separado
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('particles-js')) {
+        particlesJS('particles-js', {
+            "particles": { "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#0d6efd" }, "shape": { "type": "circle" }, "opacity": { "value": 0.7, "random": true }, "size": { "value": 3, "random": true }, "line_linked": { "enable": true, "distance": 150, "color": "#0d6efd", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "out_mode": "out" } }, "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" } }, "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 0.5 } } } }, "retina_detect": true
+        });
+    }
 });

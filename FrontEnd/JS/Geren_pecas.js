@@ -359,11 +359,23 @@ function filtrarPecas() {
     });
   }
 
-  // Atualiza a lista filtrada e renderiza a tabela
+  // Atualiza a lista filtrada
   filteredPecas = tempPecas;
   totalPages = Math.ceil(filteredPecas.length / rowsPerPage);
   createPagination();
-  changePage(1);
+
+  // --- MUDANÇA PRINCIPAL AQUI ---
+  // Verifica se há resultados. Se não houver, renderiza a tabela vazia
+  // e atualiza a interface para o estado de "sem resultados".
+  if (totalPages === 0) {
+    renderTableRows(); // Força a renderização da tabela, que ficará vazia
+    document.getElementById("content").innerText = "Nenhum resultado";
+    document.getElementById("prevBtn").disabled = true;
+    document.getElementById("nextBtn").disabled = true;
+  } else {
+    // Se houver resultados, procede normalmente para a primeira página.
+    changePage(1);
+  }
 }
 
 function renderTableRows() {
@@ -451,20 +463,83 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("prevBtn").addEventListener("click", () => changePage(currentPage - 1));
   document.getElementById("nextBtn").addEventListener("click", () => changePage(currentPage + 1));
 
-  // Event Listeners para os filtros e pesquisa
-  document.getElementById('aplicar_filtros').addEventListener('click', (event) => {
-    filtrarPecas();
-    fecharDropdown('filterDropdown');
-  });
+  // --- CORREÇÃO ADICIONADA AQUI ---
+  // Adiciona filtragem em tempo real para os inputs
+  document.getElementById('search_input').addEventListener('input', filtrarPecas);
+  document.getElementById('estoque_min').addEventListener('input', filtrarPecas);
+  document.getElementById('estoque_max').addEventListener('input', filtrarPecas);
+  // ---------------------------------
 
   document.getElementById('limpar_filtros').addEventListener('click', () => {
     document.getElementById('search_input').value = '';
     document.getElementById('estoque_min').value = '';
     document.getElementById('estoque_max').value = '';
-    filtrarPecas();
+    filtrarPecas(); // Chama a função para re-renderizar com os campos limpos
     fecharDropdown('filterDropdown');
   });
 
   // Carrega as peças ao iniciar
   carregarPecas();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Garante que o container para as partículas exista antes de iniciar.
+    if (document.getElementById('particles-js')) {
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 50,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#0d6efd"
+                },
+                "shape": {
+                    "type": "circle"
+                },
+                "opacity": {
+                    "value": 0.7,
+                    "random": true
+                },
+                "size": {
+                    "value": 3,
+                    "random": true
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#0d6efd",
+                    "opacity": 0.2,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "out_mode": "out"
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    }
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 0.5
+                        }
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    }
 });

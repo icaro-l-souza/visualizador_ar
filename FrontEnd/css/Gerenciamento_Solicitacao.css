@@ -28,15 +28,10 @@ header {
 
 
 
-
-#Titulo {
-  margin-left: 30px;
-}
-
 .geral {
   display: flex;
-  gap: 5px;
-  margin-right: -500px;
+  gap: 20px;
+  margin-right: -5px;
 }
 
 .titulo-e-botao {
@@ -170,8 +165,8 @@ td {
   border-radius: 10px;
 }
 
-.delete-btn,
-.edit-btn,
+.aceitar-btn,
+.recusar-btn,
 .delete-btn-soli {
   margin: 1px;
   background: none;
@@ -190,12 +185,12 @@ td {
   font-size: 25px;
 }
 
-.delete-btn {
+.aceitar-btn {
   color: greenyellow;
   font-size: 25px;
 }
 
-.edit-btn {
+.recusar-btn {
   color: red;
   background-color: none;
   font-size: 25px;
@@ -319,4 +314,46 @@ td {
   border-color: #ddd;
 }
 
+#button_main {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-line {
+    width: 30px;
+    height: 5px;
+    background-color: gray;
+    border: none;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+.active-line {
+    background-color: blue;
+}
+
+.arrow-btn {
+    font-size: 20px;
+    padding: 5px 10px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.arrow-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#exportDropdown {
+    box-shadow: 2px 2px #3e3e3e;
+    background-color: #157347;
+    border: none;
+    transition: all 0.3s ease-in-out;
+}
+
+#exportDropdown:hover {
+  background-color: #125e3b; 
+  transform: scale(1.02); 
+}
 
